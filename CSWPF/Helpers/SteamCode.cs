@@ -1,0 +1,38 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using CSWPF.Directory;
+
+namespace CSWPF.Helpers;
+
+public class SteamCode
+{
+    private int defaulttime = 300;
+    public const int WM_CHAR = 0x102;
+    [DllImport("user32.dll")]
+    public static extern void SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+    
+    public async Task SteamCodeEnter(User user)
+    {
+        await Task.Delay(100000);
+        
+        IEnumerable<Process> SteamProcesses = Process.GetProcesses().Where(pr => pr.ProcessName.ToLower().Contains($"steam_{user.SteamID}"));
+        string code = await TwoFactory.GenerateSteamGuardCode(TwoFactory.GetSteamTime(), user.SharedSecret);
+        await Task.Delay(defaulttime);
+        SetForegroundWindow(SteamProcesses.First().MainWindowHandle);
+        await Task.Delay(defaulttime);
+        foreach (char item in code)
+        {
+            SendMessage(SteamProcesses.First().MainWindowHandle, WM_CHAR, new IntPtr((Int32)item), (IntPtr)0);
+            await Task.Delay(defaulttime);
+        }
+        SendKeys.SendWait("{ENTER}");
+    }
+}
