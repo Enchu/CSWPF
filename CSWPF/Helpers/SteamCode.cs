@@ -9,9 +9,9 @@ using CSWPF.Directory;
 
 namespace CSWPF.Helpers;
 
-public class SteamCode
+public static class SteamCode
 {
-    private int defaulttime = 300;
+    private static int defaulttime = 300;
     public const int WM_CHAR = 0x102;
     [DllImport("user32.dll")]
     public static extern void SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
@@ -19,10 +19,9 @@ public class SteamCode
     [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
     
-    public async Task SteamCodeEnter(User user)
+    public static async Task SteamCodeEnter(User user)
     {
-        await Task.Delay(100000);
-        
+        await Task.Delay(5000);
         IEnumerable<Process> SteamProcesses = Process.GetProcesses().Where(pr => pr.ProcessName.ToLower().Contains($"steam_{user.SteamID}"));
         string code = await TwoFactory.GenerateSteamGuardCode(TwoFactory.GetSteamTime(), user.SharedSecret);
         await Task.Delay(defaulttime);

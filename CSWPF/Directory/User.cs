@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
@@ -9,7 +10,6 @@ using System.Windows;
 using CSWPF.Helpers;
 using CSWPF.Web;
 using Newtonsoft.Json;
-using SteamKit2;
 
 namespace CSWPF.Directory;
 
@@ -25,6 +25,8 @@ public class User
     public ulong SteamID { get; set; }
     [JsonProperty("shared_secret")]
     public string SharedSecret { get; set; }
+    [JsonProperty("prime")]
+    public bool Prime { get; set; }
     public DateTime DateTime { get; set; } = DateTime.Now;
 
     public User(string login, string password)
@@ -39,8 +41,9 @@ public class User
     }
 
     public void ClickStart(object sender, RoutedEventArgs e)
-    {
-        /*await Task.Run(() => { }); */
+    { 
+        if(!File.Exists($"{Settings.SteamPath}steam_{SteamID}.exe"))
+            File.Copy($"{Settings.SteamFullPath}",$"{Settings.SteamPath}steam_{SteamID}.exe");
         new Thread(() =>
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()
@@ -48,9 +51,9 @@ public class User
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                WorkingDirectory = "D:\\Steam\\",
-                FileName = "D:\\Steam\\steam.exe",
-                Arguments = $" -login {Login} {Password} -applaunch 730 -w 640 -h 480",
+                WorkingDirectory = $"{Settings.SteamPath}",
+                FileName = $"{Settings.SteamPath}steam_{SteamID}.exe",
+                Arguments = $" -login {Login} {Password} {Settings.ConfigBot}",
             };
             Process process1 = new Process()
             {
@@ -58,15 +61,31 @@ public class User
             };
             process1.Start();
         }).Start();
-        //SteamCode dsa = new SteamCode();
-        //dsa.SteamCodeEnter(this);
+        
+        SteamCode.SteamCodeEnter(this);
     }
 
     //https://steamcommunity.com/inventory/76561199198508752/730/2/?l=english
     public void ClickCheckInventory(object sender, RoutedEventArgs e)
     {
-        //maFile ss = Helper.ReadFile("D:\\Game\\SteamSDA\\maFiles",Login);
-        //Helper.CheckInventory(ss.Session.SteamId);
+        
+    }
+
+    public void CheckAccount()
+    {
+        if (SharedSecret == null)
+        {
+            foreach (string filename in System.IO.Directory.GetFiles(@"D:\Game\SteamSDA\maFiles", "*.maFile"))
+            {
+                var currentUsers = JsonConvert.DeserializeObject<maFile>(File.ReadAllText(filename));
+                if (currentUsers.AccountName == Login)
+                {
+                    SharedSecret = currentUsers.SharedSecret;
+                }
+            }
+
+            File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json", JsonConvert.SerializeObject(this));
+        }
     }
     
 }

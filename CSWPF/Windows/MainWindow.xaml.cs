@@ -14,12 +14,13 @@ namespace CSWPF.Windows
     public partial class MainWindow
     {
         //-console -no-browser -window -w 640 -h 480 -novid -nosound +connect 185.255.133.169:20065 192.168.31.220:27015
-        private static List<User> _users = new List<User>();
+        private static List<User> _users = new();
         private static void Check()
         {
             foreach (var filename in System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory() + @"\Account\", "*.json"))
             {
                 User allUsers = JsonConvert.DeserializeObject<User>(File.ReadAllText(filename));
+                allUsers.CheckAccount();
                 _users.Add(allUsers);
             }
         }
@@ -48,7 +49,6 @@ namespace CSWPF.Windows
                 checkInventory.Content = "Check";
                 checkInventory.Click += db.ClickCheckInventory;
                 //PanelForButton.Children.Add(checkInventory);
-                
             }
             _users.Clear();
         }
@@ -83,11 +83,6 @@ namespace CSWPF.Windows
         {
             CollapsedAll(Visibility.Collapsed);
             PanelForAdd.Visibility = Visibility.Visible;
-        }
-
-        private void MainWindow_OnClosed(object? sender, EventArgs e)
-        {
-            throw new NotImplementedException();
         }
     }
 }

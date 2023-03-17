@@ -28,13 +28,14 @@ public class Helper
             {
                 allUsers.SteamID = currentUsers.Session.SteamId;
                 allUsers.SharedSecret = currentUsers.SharedSecret;
+                allUsers.Prime = false;
             }
         }
         if(allUsers.SteamID == 0)
         {
             return;
         }
-        
+
         File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + allUsers.Login + ".json", JsonConvert.SerializeObject(allUsers));
     }
 
