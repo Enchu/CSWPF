@@ -45,6 +45,14 @@
         "net7.0-windows7.0": {
           "targetAlias": "net7.0-windows",
           "dependencies": {
+            "AngleSharp": {
+              "target": "Package",
+              "version": "[1.0.2-alpha-278, )"
+            },
+            "AngleSharp.XPath": {
+              "target": "Package",
+              "version": "[2.0.1, )"
+            },
             "Form": {
               "target": "Package",
               "version": "[0.9.28, )"
@@ -52,6 +60,10 @@
             "HtmlAgilityPack": {
               "target": "Package",
               "version": "[1.11.46, )"
+            },
+            "Humanizer": {
+              "target": "Package",
+              "version": "[2.14.1, )"
             },
             "JetBrains.Annotations": {
               "target": "Package",
@@ -68,6 +80,10 @@
             "SteamKit2": {
               "target": "Package",
               "version": "[2.4.1, )"
+            },
+            "zxcvbn-core": {
+              "target": "Package",
+              "version": "[8.0.0-beta0002, )"
             }
           },
           "imports": [

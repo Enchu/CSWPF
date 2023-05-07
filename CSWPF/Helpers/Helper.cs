@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CSWPF.Directory;
-using CSWPF.Responses;
+using CSWPF.Web.Responses;
 using CSWPF.Web;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -55,8 +55,8 @@ public class Helper
         using var request = new HttpRequestMessage(HttpMethod.Post, uri);
         using var response = await httpClient.SendAsync(request);
         var responseText = await response.Content.ReadAsStringAsync();
-
-        ObjectResponce<Inventory>? responce = null;
+        
+        ObjectResponse<Inventory>? responce = null;
         try
         {
             for (byte i = 0; (i < Web.Web.MaxTries) && (responce == null); i++)
@@ -70,24 +70,6 @@ public class Helper
             }
         }
         catch{}
-        return null;
-    }
-
-    public async Task<ObjectResponce<T>?> UrlGetToJsonObjectWithSession<T>(Uri request,
-        IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, Uri? referer = null, Web.Web.ERequestOptions requestOptions = Web.Web.ERequestOptions.None, bool checkSessionPreemptively = true, byte maxTries = Web.Web.MaxTries, int rateLimitingDelay = 0, bool allowSessionRefresh = true)
-    {
-        if (maxTries == 0) {
-            throw new ArgumentOutOfRangeException(nameof(maxTries));
-        }
-        if (rateLimitingDelay < 0) {
-            throw new ArgumentOutOfRangeException(nameof(rateLimitingDelay));
-        }
-        if (WebLimiterDelay > rateLimitingDelay) {
-            rateLimitingDelay = WebLimiterDelay;
-        }
-        Uri host = new(request.GetLeftPart(UriPartial.Authority));
-        //ObjectResponse<T>? response = await WebLimitRequest(host, async () => await WebBrowser.UrlGetToJsonObject<T>(request, headers, referer, requestOptions, maxTries, rateLimitingDelay).ConfigureAwait(false)).ConfigureAwait(false);
-
         return null;
     }
 }

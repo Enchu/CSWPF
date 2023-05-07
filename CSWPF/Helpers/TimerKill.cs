@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using CSWPF.Utils;
 
 namespace CSWPF.Helpers;
 
@@ -19,9 +20,33 @@ public class TimerKill
         catch (Exception ex) { }
         try
         {
-            ((IEnumerable<Process>) Process.GetProcesses()).Where<Process>((Func<Process, bool>) (x => x.ProcessName.ToLower().StartsWith("steam"))).ToList<Process>().ForEach((Action<Process>) (x => x.Kill()));
+            ((IEnumerable<Process>) Process.GetProcesses()).Where<Process>((Func<Process, bool>) 
+                (x => x.ProcessName.ToLower().StartsWith("steam"))).ToList<Process>().ForEach((Action<Process>) (x => x.Kill()));
         }
         catch (Exception ex) { }
+    }
+    
+    public static void KillSteam(ulong steamid)
+    {
+        try
+        {
+            ((IEnumerable<Process>) Process.GetProcesses()).Where<Process>((Func<Process, bool>) 
+                (x => x.ProcessName.ToLower().StartsWith($"steam_{steamid}"))).ToList<Process>().ForEach((Action<Process>) (x => x.Kill()));
+        }
+        catch (Exception ex) { Msg.ShowError(""+ ex.ToString());}
+    }
+
+    public static void OpenSteam(string pathSteam)
+    {
+        new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = "cmd.exe",
+                Arguments = ("/C call \"" + pathSteam + "\" steam://open/games")
+            }
+        }.Start();
     }
 
     public static void Timer()

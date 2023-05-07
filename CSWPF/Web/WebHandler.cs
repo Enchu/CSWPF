@@ -13,7 +13,7 @@ using SteamKit2;
 
 namespace CSWPF.Web;
 
-public class WebHandler
+public sealed class WebHandler
 {
     private const string TwoFactorService = "ITwoFactorService";
     private static ushort WebLimiterDelay => ASF.GlobalConfig?.WebLimiterDelay ?? GlobalConfig.DefaultWebLimiterDelay;
@@ -70,12 +70,11 @@ public class WebHandler
 
         if (!ASF.WebLimitingSemaphores.TryGetValue(service, out (ICrossProcessSemaphore RateLimitingSemaphore, SemaphoreSlim OpenConnectionsSemaphore) limiters))
         {
-            //ASF.ArchiLogger.LogGenericWarning(string.Format(CultureInfo.CurrentCulture, Strings.WarningUnknownValuePleaseReport, nameof(service), service));
             limiters.RateLimitingSemaphore = ASF.RateLimitingSemaphore;
             limiters.OpenConnectionsSemaphore = ASF.OpenConnectionsSemaphore;
         }
         await limiters.OpenConnectionsSemaphore.WaitAsync().ConfigureAwait(false);
-
+        
         try
         {
             await limiters.RateLimitingSemaphore.WaitAsync().ConfigureAwait(false);
@@ -94,5 +93,6 @@ public class WebHandler
         {
             limiters.OpenConnectionsSemaphore.Release();
         }
+        
     }
 }

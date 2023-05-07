@@ -26,12 +26,17 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             
             <StackPanel Grid.Column="0" Name="PanelFor"/>
             <StackPanel Grid.Column="1" Name="PanelForLogin" />
             <StackPanel Grid.Column="2" Name="PanelForPassword"/>
-            <StackPanel Grid.Column="3" Name="PanelForButton"/>
+            <StackPanel Grid.Column="3" Name="PanelForStart" Orientation="Vertical"/>
+            <StackPanel Grid.Column="4" Name="PanelForKill"/>
+            <StackPanel Grid.Column="5" Name="PanelForOpenSteam"/>
+            
         </Grid>
         
         <StackPanel Grid.Row="1" Name="PanelForAdd" Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">

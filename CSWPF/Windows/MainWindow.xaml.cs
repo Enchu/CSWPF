@@ -25,11 +25,19 @@ namespace CSWPF.Windows
             }
         }
         
-        void Load()
+        private void Load()
         {
             Check();
+            CreateChildren();
+            _users.Clear();
+        }
+
+        private void CreateChildren()
+        {
             foreach (var db in _users)
             {
+                StackPanel stackPanel = new StackPanel();
+                stackPanel.Orientation = Orientation.Horizontal;
                 //login
                 var login = new Label();
                 login.Content = db.Login;
@@ -43,13 +51,39 @@ namespace CSWPF.Windows
                 var startCS = new Button();
                 startCS.Content = "Go";
                 startCS.Click += db.ClickStart;
-                PanelForButton.Children.Add(startCS);
+                stackPanel.Children.Add(startCS);
+                //kill
+                var killCS = new Button();
+                killCS.Content = "Kill";
+                killCS.Click += db.ClickKill;
+                PanelForKill.Children.Add(killCS);
+                //open Steam
+                var openSteam = new Button();
+                openSteam.Content = "Steam";
+                openSteam.Click += db.ClickOpenSteam;
+                //PanelForOpenSteam.Children.Add(openSteam);
                 //invent
                 var checkInventory = new Button();
                 checkInventory.Content = "Check";
                 checkInventory.Click += db.ClickCheckInventory;
                 //PanelForButton.Children.Add(checkInventory);
+                
+                //checkbox
+                CheckBox checkBoxFinal = new CheckBox();
+                checkBoxFinal.Margin = new Thickness(5);
+                checkBoxFinal.Content = "F";
+                stackPanel.Children.Add(checkBoxFinal);
+
+                CheckBox checkBoxPrime = new CheckBox();
+                checkBoxPrime.Margin = new Thickness(5);
+                checkBoxPrime.Content = "Prime";
+                checkBoxPrime.IsChecked = db.Prime;
+                checkBoxPrime.Checked += db.CheckPrime;
+                stackPanel.Children.Add(checkBoxPrime);
+
+                PanelForStart.Children.Add(stackPanel);
             }
+            
             _users.Clear();
         }
 
@@ -58,9 +92,14 @@ namespace CSWPF.Windows
             if (Msg.ShowQuestion("Вы действительно хотите добавить?"))
             {
                 User newUser = new User(LoginTextBox.Text, PasswordTextBox.Text);
+                LoginTextBox.Clear();
+                PasswordTextBox.Clear();
+                
                 Helper.SaveToDB(newUser);
-                Msg.ShowInfo("Данные добавлены");
+                ClearAll();
                 Load();
+                
+                Msg.ShowInfo("Данные добавлены");
                 CollapsedAll(Visibility.Visible);
                 PanelForAdd.Visibility = Visibility.Collapsed;
             }
@@ -70,8 +109,20 @@ namespace CSWPF.Windows
         {
             PanelForLogin.Visibility = visibility;
             PanelForPassword.Visibility = visibility;
-            PanelForButton.Visibility = visibility;
+            PanelForStart.Visibility = visibility;
             PanelFor.Visibility = visibility;
+            PanelForKill.Visibility = visibility;
+            PanelForOpenSteam.Visibility = visibility;
+        }
+
+        private void ClearAll()
+        {
+            PanelForLogin.Children.Clear();
+            PanelForPassword.Children.Clear();
+            PanelForStart.Children.Clear();
+            PanelFor.Children.Clear();
+            PanelForKill.Children.Clear();
+            PanelForOpenSteam.Children.Clear();
         }
         public MainWindow()
         {

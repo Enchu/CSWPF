@@ -1,30 +1,24 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using JetBrains.Annotations;
 
-namespace CSWPF.Responses;
+namespace CSWPF.Web.Responses;
 
-public class BasicResponce
-{
-    [PublicAPI]
+public class BasicResponse {
     public Uri FinalUri { get; }
-
-    [PublicAPI]
     public HttpStatusCode StatusCode { get; }
 
-    internal BasicResponce(HttpResponseMessage httpResponseMessage) {
+    internal BasicResponse(HttpResponseMessage httpResponseMessage) {
         ArgumentNullException.ThrowIfNull(httpResponseMessage);
 
         FinalUri = httpResponseMessage.Headers.Location ?? httpResponseMessage.RequestMessage?.RequestUri ?? throw new InvalidOperationException();
         StatusCode = httpResponseMessage.StatusCode;
     }
-    
-    internal BasicResponce(BasicResponce basicResponse) {
+
+    internal BasicResponse(BasicResponse basicResponse) {
         ArgumentNullException.ThrowIfNull(basicResponse);
 
         FinalUri = basicResponse.FinalUri;
         StatusCode = basicResponse.StatusCode;
     }
-    
 }
