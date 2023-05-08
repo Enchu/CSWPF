@@ -1,7 +1,7 @@
 # CSWPF
 Bots for any game
 
-#Tasks:
+# Tasks:
 - [X] Farm
 - [ ] WEB
   - [ ] Open inventory
@@ -9,4 +9,4 @@ Bots for any game
   - [ ] Invite
 - [ ] Create account
 
-#Структура папок и файлов
+# Структура папок и файлов
