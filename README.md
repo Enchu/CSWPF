@@ -3,8 +3,8 @@ Bots for any game
 
 tasks:
 -[X] Farm
--[] WEB
-  -[] Open inventory
-  -[] Trade offer
-  -[] Invite
--[] Create account
+-[ ] WEB
+  -[ ] Open inventory
+  -[ ] Trade offer
+  -[ ] Invite
+-[ ] Create account
