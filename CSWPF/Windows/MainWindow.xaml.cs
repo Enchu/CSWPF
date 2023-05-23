@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CSWPF.Directory;
 using CSWPF.Helpers;
 using CSWPF.Utils;
 using Newtonsoft.Json;
-using SteamAuth;
 
 namespace CSWPF.Windows
 {
@@ -31,37 +32,56 @@ namespace CSWPF.Windows
             CreateChildren();
             _users.Clear();
         }
-
+        
         private void CreateChildren()
         {
             foreach (var db in _users)
             {
                 StackPanel stackPanel = new StackPanel();
                 stackPanel.Orientation = Orientation.Horizontal;
+                
                 //login
                 var login = new Label();
                 login.Content = db.Login;
                 PanelForLogin.Children.Add(login);
+                
                 //password
                 var password = new Button();
-                password.Content = "Copy";
+                Image passwordContent = new Image();
+                passwordContent.Stretch = Stretch.Uniform;
+                passwordContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/screwdriver.png"));
+                password.Content = passwordContent;
+                password.Style = this.FindResource("ImageButtonStyle") as Style;
                 password.Click += db.ClickPassword;
                 PanelForPassword.Children.Add(password);
+                
                 //start
                 var startCS = new Button();
-                startCS.Content = "Go";
+                Image startCSContent = new Image();
+                startCSContent.Stretch = Stretch.Uniform;
+                startCSContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/cow.png"));
+                startCS.Content = startCSContent;
+                startCS.Style = this.FindResource("ImageButtonStyle") as Style;
+                //startCS.Style = Application.Current.FindResource("ImageButtonStyle") as Style;
                 startCS.Click += db.ClickStart;
                 stackPanel.Children.Add(startCS);
+                
                 //kill
                 var killCS = new Button();
-                killCS.Content = "Kill";
+                Image killCsContent = new Image();
+                killCsContent.Stretch = Stretch.Uniform;
+                killCsContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/cloud-lightning.png"));
+                killCS.Content = killCsContent;
+                killCS.Style = this.FindResource("ImageButtonStyle") as Style;
                 killCS.Click += db.ClickKill;
                 PanelForKill.Children.Add(killCS);
+                
                 //open Steam
                 var openSteam = new Button();
                 openSteam.Content = "Steam";
                 openSteam.Click += db.ClickOpenSteam;
                 //PanelForOpenSteam.Children.Add(openSteam);
+                
                 //invent
                 var checkInventory = new Button();
                 checkInventory.Content = "Check";
@@ -134,6 +154,12 @@ namespace CSWPF.Windows
         {
             CollapsedAll(Visibility.Collapsed);
             PanelForAdd.Visibility = Visibility.Visible;
+        }
+
+        private void BackBtClick(object sender, RoutedEventArgs e)
+        {
+            CollapsedAll(Visibility.Visible);
+            PanelForAdd.Visibility = Visibility.Collapsed;
         }
     }
 }

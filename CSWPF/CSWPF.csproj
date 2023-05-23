@@ -29,4 +29,17 @@
       <PackageReference Include="zxcvbn-core" Version="8.0.0-beta0002" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Icons\gear.png" />
+      <Resource Include="Icons\gear.png" />
+      <None Remove="Icons\plus.png" />
+      <Resource Include="Icons\plus.png" />
+      <None Remove="Icons\cloud-lightning.png" />
+      <Resource Include="Icons\cloud-lightning.png" />
+      <None Remove="Icons\cow.png" />
+      <Resource Include="Icons\cow.png" />
+      <None Remove="Icons\screwdriver.png" />
+      <Resource Include="Icons\screwdriver.png" />
+    </ItemGroup>
+
 </Project>
