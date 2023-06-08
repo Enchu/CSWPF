@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices.JavaScript;
@@ -8,7 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CSWPF.Helpers;
+using CSWPF.Utils;
 using CSWPF.Web;
+using System.Linq;
+using CSWPF.Steam;
+using CSWPF.Steam.Data;
 using Newtonsoft.Json;
 
 namespace CSWPF.Directory;
@@ -77,12 +82,23 @@ public class User
     {
         TimerKill.KillSteam(SteamID);
     }
-        
-
+    
+    //https://steamcommunity.com/inventory/76561199198508752/730/2?l=english&count=5000
     //https://steamcommunity.com/inventory/76561199198508752/730/2/?l=english
+
     public void ClickCheckInventory(object sender, RoutedEventArgs e)
+    { 
+        //CheckInventory();
+    }
+    public async Task CheckInventory()
     {
-        
+        List<AssetSteam> inventory =  null;
+        var users = JsonConvert.DeserializeObject<User>(File.ReadAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json"));
+        Bot newBot = new Bot(users);
+        await newBot.Start();
+        await Task.Delay(30000);
+        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
+        Msg.ShowInfo(inventory.ToString());
     }
     
     public void CheckPrime(object sender, RoutedEventArgs e)
