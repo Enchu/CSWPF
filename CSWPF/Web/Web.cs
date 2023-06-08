@@ -5,7 +5,6 @@ namespace CSWPF.Web;
 
 public sealed class Web
 {
-    [PublicAPI]
     public const byte MaxTries = 5;
     private const ushort ExtendedTimeout = 600;
     private const byte MaxIdleTime = 15;

@@ -1,17 +1,13 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-namespace CSWPF.Directory;
+namespace CSWPF.Steam.Data;
 
-public class Tag
-{
+public sealed class Tag {
     [JsonProperty("category", Required = Required.Always)]
-    [PublicAPI]
     public string Identifier { get; private set; } = "";
 
     [JsonProperty("internal_name", Required = Required.Always)]
-    [PublicAPI]
     public string Value { get; private set; } = "";
 
     internal Tag(string identifier, string value) {
@@ -19,6 +15,6 @@ public class Tag
         Value = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    [JsonConstructor]
+    [System.Text.Json.Serialization.JsonConstructor]
     private Tag() { }
 }

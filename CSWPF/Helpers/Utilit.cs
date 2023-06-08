@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace CSWPF.Helpers;
 
-public class Utilities
+public class Utilit
 {
     [PublicAPI]
     public static ulong GetUnixTime() => (ulong) DateTimeOffset.UtcNow.ToUnixTimeSeconds();

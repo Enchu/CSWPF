@@ -96,16 +96,19 @@ public sealed class WebBrowser : IDisposable
 	}
 
 	public static HttpClient GenerateDisposableHttpClient(bool extendedTimeout = false) {
-		byte connectionTimeout = ASF.GlobalConfig?.ConnectionTimeout ?? GlobalConfig.DefaultConnectionTimeout;
+		byte connectionTimeout = 90;
 
-		HttpClient result = new(HttpClientHandler, false) { 
-			DefaultRequestVersion = HttpVersion.Version30,
+		HttpClient result = new(HttpClientHandler, false)
+		{
 			Timeout = TimeSpan.FromSeconds(extendedTimeout ? ExtendedTimeout : connectionTimeout)
 		};
 
-		result.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(PublicIdentifier, Version.ToString()));
-		result.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue($"({BuildInfo.Variant}; {OS.Version.Replace("(", "", StringComparison.Ordinal).Replace(")", "", StringComparison.Ordinal)};)"));
-		
+		// Most web services expect that UserAgent is set, so we declare it globally
+		// If you by any chance came here with a very "clever" idea of hiding your ass by changing default ASF user-agent then here is a very good advice from me: don't, for your own safety - you've been warned
+		result.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Farm", "1.0.0"));
+		result.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue($"(Windows NT 10.0; Win64; x64)"));
+
+		// Inform websites that we visit about our preference in language, if possible
 		result.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-US", 0.9));
 		result.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en", 0.8));
 
@@ -494,7 +497,7 @@ public sealed class WebBrowser : IDisposable
 		return null;
 	}
 
-	public async Task<HtmlDocumentResponse?> UrlPostToHtmlDocument<T>(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, byte maxTries = MaxTries, int rateLimitingDelay = 0) where T : class {
+	public static async Task<HtmlDocumentResponse?> UrlPostToHtmlDocument<T>(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, byte maxTries = MaxTries, int rateLimitingDelay = 0) where T : class {
 		ArgumentNullException.ThrowIfNull(request);
 
 		if (maxTries == 0) {
@@ -634,7 +637,7 @@ public sealed class WebBrowser : IDisposable
 		return null;
 	}
 	
-	public async Task<StreamResponse?> UrlPostToStream<T>(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, byte maxTries = MaxTries, int rateLimitingDelay = 0) where T : class {
+	public static async Task<StreamResponse?> UrlPostToStream<T>(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, byte maxTries = MaxTries, int rateLimitingDelay = 0) where T : class {
 		ArgumentNullException.ThrowIfNull(request);
 
 		if (maxTries == 0) {
@@ -686,7 +689,6 @@ public sealed class WebBrowser : IDisposable
 		ServicePointManager.MaxServicePointIdleTime = MaxIdleTime * 1000;
 		ServicePointManager.Expect100Continue = false;
 		ServicePointManager.ReusePort = true;
-
 	}
 
 	private async Task<HttpResponseMessage?> InternalGet(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseContentRead) {
@@ -701,13 +703,13 @@ public sealed class WebBrowser : IDisposable
 		return await InternalRequest<object>(request, HttpMethod.Head, headers, null, referer, requestOptions, httpCompletionOption).ConfigureAwait(false);
 	}
 
-	private async Task<HttpResponseMessage?> InternalPost<T>(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseContentRead) where T : class {
+	private static async Task<HttpResponseMessage?> InternalPost<T>(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseContentRead) where T : class {
 		ArgumentNullException.ThrowIfNull(request);
 
 		return await InternalRequest(request, HttpMethod.Post, headers, data, referer, requestOptions, httpCompletionOption).ConfigureAwait(false);
 	}
 
-	private async Task<HttpResponseMessage?> InternalRequest<T>(Uri request, HttpMethod httpMethod, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseContentRead, byte maxRedirections = MaxTries) where T : class {
+	private static async Task<HttpResponseMessage?> InternalRequest<T>(Uri request, HttpMethod httpMethod, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, T? data = null, Uri? referer = null, ERequestOptions requestOptions = ERequestOptions.None, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseContentRead, byte maxRedirections = MaxTries) where T : class {
 		ArgumentNullException.ThrowIfNull(request);
 		ArgumentNullException.ThrowIfNull(httpMethod);
 

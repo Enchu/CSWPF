@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace CSWPF.Helpers;
 
-public class Helper
+public class HelperCS
 {
     [PublicAPI]
     public static Uri SteamCommunityURL => new("https://steamcommunity.com");
@@ -46,7 +46,7 @@ public class Helper
         return currentUsers ?? new List<User>();
     }
 
-    static HttpClient httpClient = new HttpClient();
+    /*static HttpClient httpClient = new HttpClient();
     public static async Task<Inventory> CheckInventory(ulong text)
     {
         int rateLimitingDelay = (ASF.GlobalConfig?.InventoryLimiterDelay ?? GlobalConfig.DefaultInventoryLimiterDelay) * 1000;
@@ -71,5 +71,5 @@ public class Helper
         }
         catch{}
         return null;
-    }
+    }*/
 }

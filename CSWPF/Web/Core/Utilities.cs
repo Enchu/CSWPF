@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.XPath;
 using CSWPF.Utils;
-using SteamKit2;
 using Humanizer;
 using Humanizer.Localisation;
+using SteamKit2;
 using Zxcvbn;
 
 namespace CSWPF.Web.Core;
@@ -24,7 +24,7 @@ public static class Utilities {
 
 	// normally we'd just use words like "steam" and "farm", but the library we're currently using is a bit iffy about banned words, so we need to also add combinations such as "steamfarm"
 	private static readonly ImmutableHashSet<string> ForbiddenPasswordPhrases = ImmutableHashSet.Create(StringComparer.InvariantCultureIgnoreCase, "archisteamfarm", "archi", "steam", "farm", "archisteam", "archifarm", "steamfarm", "asf", "asffarm", "password");
-	
+
 	public static string GetArgsAsText(string[] args, byte argsToSkip, string delimiter) {
 		ArgumentNullException.ThrowIfNull(args);
 
@@ -38,7 +38,7 @@ public static class Utilities {
 
 		return string.Join(delimiter, args.Skip(argsToSkip));
 	}
-	
+
 	public static string GetArgsAsText(string text, byte argsToSkip) {
 		if (string.IsNullOrEmpty(text)) {
 			throw new ArgumentNullException(nameof(text));
@@ -58,13 +58,12 @@ public static class Utilities {
 		}
 
 		CookieCollection cookies = cookieContainer.GetCookies(uri);
-
-
 		return cookies.Count > 0 ? (from Cookie cookie in cookies where cookie.Name == name select cookie.Value).FirstOrDefault() : null;
+
 	}
 	
 	public static ulong GetUnixTime() => (ulong) DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-	
+
 	public static async void InBackground(Action action, bool longRunning = false) {
 		ArgumentNullException.ThrowIfNull(action);
 
@@ -76,51 +75,11 @@ public static class Utilities {
 
 		await Task.Factory.StartNew(action, CancellationToken.None, options, TaskScheduler.Default).ConfigureAwait(false);
 	}
-	
+
 	public static void InBackground<T>(Func<T> function, bool longRunning = false) {
 		ArgumentNullException.ThrowIfNull(function);
 
 		InBackground(void() => function(), longRunning);
-	}
-	
-	public static async Task<IList<T>> InParallel<T>(IEnumerable<Task<T>> tasks) {
-		ArgumentNullException.ThrowIfNull(tasks);
-
-		IList<T> results;
-
-		switch (ASF.GlobalConfig?.OptimizationMode) {
-			case GlobalConfig.EOptimizationMode.MinMemoryUsage:
-				results = new List<T>();
-
-				foreach (Task<T> task in tasks) {
-					results.Add(await task.ConfigureAwait(false));
-				}
-
-				break;
-			default:
-				results = await Task.WhenAll(tasks).ConfigureAwait(false);
-
-				break;
-		}
-
-		return results;
-	}
-
-	public static async Task InParallel(IEnumerable<Task> tasks) {
-		ArgumentNullException.ThrowIfNull(tasks);
-
-		switch (ASF.GlobalConfig?.OptimizationMode) {
-			case GlobalConfig.EOptimizationMode.MinMemoryUsage:
-				foreach (Task task in tasks) {
-					await task.ConfigureAwait(false);
-				}
-
-				break;
-			default:
-				await Task.WhenAll(tasks).ConfigureAwait(false);
-
-				break;
-		}
 	}
 
 	public static bool IsClientErrorCode(this HttpStatusCode statusCode) => statusCode is >= HttpStatusCode.BadRequest and < HttpStatusCode.InternalServerError;
@@ -130,14 +89,7 @@ public static class Utilities {
 	public static bool IsServerErrorCode(this HttpStatusCode statusCode) => statusCode is >= HttpStatusCode.InternalServerError and < (HttpStatusCode) 600;
 
 	public static bool IsSuccessCode(this HttpStatusCode statusCode) => statusCode is >= HttpStatusCode.OK and < HttpStatusCode.Ambiguous;
-
-	public static bool IsValidCdKey(string key) {
-		if (string.IsNullOrEmpty(key)) {
-			throw new ArgumentNullException(nameof(key));
-		}
-
-		return GeneratedRegexes.CdKey().IsMatch(key);
-	}
+	
 
 	public static bool IsValidHexadecimalText(string text) {
 		if (string.IsNullOrEmpty(text)) {
@@ -196,7 +148,7 @@ public static class Utilities {
 
 		return job.ToTask();
 	}
-
+	
 	public static Task<AsyncJobMultiple<T>.ResultSet> ToLongRunningTask<T>(this AsyncJobMultiple<T> job) where T : CallbackMsg {
 		ArgumentNullException.ThrowIfNull(job);
 
@@ -209,7 +161,7 @@ public static class Utilities {
 		if (string.IsNullOrEmpty(directory)) {
 			throw new ArgumentNullException(nameof(directory));
 		}
-		
+
 		if (!System.IO.Directory.Exists(directory)) {
 			return;
 		}
@@ -223,7 +175,7 @@ public static class Utilities {
 				System.IO.Directory.Delete(directory);
 			}
 		} catch (Exception e) {
-			Msg.ShowError(e.ToString());
+			Msg.ShowError(""+e);
 		}
 	}
 
@@ -288,42 +240,50 @@ public static class Utilities {
 	internal static void WarnAboutIncompleteTranslation(ResourceManager resourceManager) {
 		ArgumentNullException.ThrowIfNull(resourceManager);
 
+		// Skip translation progress for English and invariant (such as "C") cultures
 		switch (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName) {
 			case "en" or "iv" or "qps":
 				return;
 		}
 
+		// We can't dispose this resource set, as we can't be sure if it isn't used somewhere else, rely on GC in this case
 		ResourceSet? defaultResourceSet = resourceManager.GetResourceSet(CultureInfo.GetCultureInfo("en-US"), true, true);
 
 		if (defaultResourceSet == null) {
+			Msg.ShowError(""+defaultResourceSet);
+
 			return;
 		}
 
 		HashSet<DictionaryEntry> defaultStringObjects = defaultResourceSet.Cast<DictionaryEntry>().ToHashSet();
 
 		if (defaultStringObjects.Count == 0) {
+			Msg.ShowError(""+defaultStringObjects);
+
 			return;
 		}
-		
+
+		// We can't dispose this resource set, as we can't be sure if it isn't used somewhere else, rely on GC in this case
 		ResourceSet? currentResourceSet = resourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
 
 		if (currentResourceSet == null) {
+			Msg.ShowError(""+currentResourceSet);
+
 			return;
 		}
 
 		HashSet<DictionaryEntry> currentStringObjects = currentResourceSet.Cast<DictionaryEntry>().ToHashSet();
 
 		if (currentStringObjects.Count >= defaultStringObjects.Count) {
+			// Either we have 100% finished translation, or we're missing it entirely and using en-US
 			HashSet<DictionaryEntry> testStringObjects = currentStringObjects.ToHashSet();
 			testStringObjects.ExceptWith(defaultStringObjects);
 
+			// If we got 0 as final result, this is the missing language
+			// Otherwise it's just a small amount of strings that happen to be the same
 			if (testStringObjects.Count == 0) {
 				currentStringObjects = testStringObjects;
 			}
-		}
-
-		if (currentStringObjects.Count < defaultStringObjects.Count) {
-			float translationCompleteness = currentStringObjects.Count / (float) defaultStringObjects.Count;
 		}
 	}
 }

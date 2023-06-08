@@ -34,4 +34,10 @@ public static class SteamCode
         }
         SendKeys.SendWait("{ENTER}");
     }
+
+    public static async Task<string> SteamCodeCreate(User user)
+    {
+        string code = await TwoFactory.GenerateSteamGuardCode(TwoFactory.GetSteamTime(), user.SharedSecret);
+        return code;
+    }
 }
