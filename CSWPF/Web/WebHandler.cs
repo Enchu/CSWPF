@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using AngleSharp.Dom;
+using CSWPF.Directory;
 using CSWPF.Helpers;
 using CSWPF.Steam;
 using CSWPF.Steam.Data;
@@ -84,7 +85,7 @@ public sealed class WebHandler : IDisposable {
 		return string.IsNullOrEmpty(VanityURL) ? $"/profiles/{Bot.SteamID}" : $"/id/{VanityURL}";
 	}
 
-	public async  Task<List<AssetSteam>> GetInventoryAsync(ulong steamID = 0, uint appID = AssetSteam.SteamAppID, ulong contextID = AssetSteam.SteamCommunityContextID)
+	public async  Task<List<AssetCS>> GetInventoryAsync(ulong steamID = 0, uint appID = AssetCS.SteamAppID, ulong contextID = AssetCS.SteamCommunityContextID)
 	{
 		ulong startAssetID = 0;
 		
@@ -94,7 +95,7 @@ public sealed class WebHandler : IDisposable {
 		
 			Uri request = new(SteamCommunityURL, $"/inventory/{steamID}/{appID}/{contextID}?l=english&count={MaxItemsInSingleInventoryRequest}{(startAssetID > 0 ? $"&start_assetid={startAssetID}" : "")}");
 
-			ObjectResponse<InventoryResponseSteam>? response = null;
+			ObjectResponse<InventoryResponseCS>? response = null;
 
 			try
             {
@@ -105,7 +106,7 @@ public sealed class WebHandler : IDisposable {
                         await Task.Delay(rateLimitingDelay).ConfigureAwait(false);
                     }
 
-                    response = await UrlGetToJsonObjectWithSession<InventoryResponseSteam>(request, requestOptions: WebBrowser.ERequestOptions.ReturnClientErrors | WebBrowser.ERequestOptions.ReturnServerErrors | WebBrowser.ERequestOptions.AllowInvalidBodyOnErrors, rateLimitingDelay: rateLimitingDelay).ConfigureAwait(false);
+                    response = await UrlGetToJsonObjectWithSession<InventoryResponseCS>(request, requestOptions: WebBrowser.ERequestOptions.ReturnClientErrors | WebBrowser.ERequestOptions.ReturnServerErrors | WebBrowser.ERequestOptions.AllowInvalidBodyOnErrors, rateLimitingDelay: rateLimitingDelay).ConfigureAwait(false);
 
                     if (response == null)
                     {
@@ -169,13 +170,13 @@ public sealed class WebHandler : IDisposable {
                 return null;
             }
 
-            Dictionary<(ulong ClassID, ulong InstanceID), InventoryResponseSteam.Description> descriptions = new();
+            Dictionary<(ulong ClassID, ulong InstanceID), InventoryResponseCS.Description> descriptions = new();
 
-            List<AssetSteam> AssetListStatement = new List<AssetSteam>();
+            List<AssetCS> AssetListStatement = new List<AssetCS>();
 
-            foreach (AssetSteam asset in response.Content.Assets)
+            foreach (AssetCS asset in response.Content.Assets)
             {
-                if (!descriptions.TryGetValue((asset.ClassID, asset.InstanceID), out InventoryResponseSteam.Description? description) || !assetIDs.Add(asset.AssetID))
+                if (!descriptions.TryGetValue((asset.ClassID, asset.InstanceID), out InventoryResponseCS.Description? description) || !assetIDs.Add(asset.AssetID))
                 {
                     continue;
                 }
@@ -183,14 +184,6 @@ public sealed class WebHandler : IDisposable {
                 asset.Marketable = description.Marketable;
                 asset.Tradable = description.Tradable;
                 asset.Tags = description.Tags;
-                asset.RealAppID = description.RealAppID;
-                asset.Type = description.Type;
-                asset.Rarity = description.Rarity;
-
-                if (description.AdditionalProperties != null)
-                {
-                    asset.AdditionalProperties = description.AdditionalProperties;
-                }
 
                 AssetListStatement.Add(asset);
             }

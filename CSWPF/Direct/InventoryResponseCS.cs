@@ -71,7 +71,6 @@ public class InventoryResponseCS: OptionalResultResponse {
 							return appID;
 					}
 				}
-
 				return 0;
 			}
 		}

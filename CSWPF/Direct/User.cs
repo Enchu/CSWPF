@@ -92,7 +92,7 @@ public class User
     }
     public async Task CheckInventory()
     {
-        List<AssetSteam> inventory =  null;
+        List<AssetCS> inventory;
         var users = JsonConvert.DeserializeObject<User>(File.ReadAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json"));
         Bot newBot = new Bot(users);
         await newBot.Start();

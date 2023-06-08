@@ -33,9 +33,15 @@ public class AssetCS
 
 	[System.Text.Json.Serialization.JsonIgnore]
 	public ulong InstanceID { get; private set; }
-
+	
+	[System.Text.Json.Serialization.JsonIgnore]
+	public bool Marketable { get; internal set; }
+	
 	[System.Text.Json.Serialization.JsonIgnore]
 	public ImmutableHashSet<Tag>? Tags { get; internal set; }
+	
+	[System.Text.Json.Serialization.JsonIgnore]
+	public bool Tradable { get; internal set; }
 
 	//[System.Text.Json.Serialization.JsonExtensionData(WriteData = false)]
 	internal Dictionary<string, JToken>? AdditionalProperties { private get; set; }
@@ -126,7 +132,7 @@ public class AssetCS
 		}
 	}
     
-    public AssetCS(uint appID, ulong contextID, ulong classID, uint amount, ulong instanceID = 0, ulong assetID = 0, ImmutableHashSet<Tag>? tags = null) {
+    public AssetCS(uint appID, ulong contextID, ulong classID, uint amount, ulong instanceID = 0, ulong assetID = 0, bool marketable = true, bool tradable = true, ImmutableHashSet<Tag>? tags = null) {
         if (appID == 0) {
             throw new ArgumentOutOfRangeException(nameof(appID));
         }
@@ -143,6 +149,8 @@ public class AssetCS
             throw new ArgumentOutOfRangeException(nameof(amount));
         }
 
+        Marketable = marketable;
+        Tradable = tradable;
         AppID = appID;
         ContextID = contextID;
         AssetID = assetID;
