@@ -61,7 +61,7 @@ public class User
                 RedirectStandardError = true,
                 WorkingDirectory = $"{Settings.SteamPath}",
                 FileName = $"{Settings.SteamPath}steam_{SteamID}.exe",
-                Arguments = $" -login {Login} {Password} {Settings.ConfigBot} {Settings.ConfigGame}",
+                Arguments = $" -login {Login} {Password} {Settings.ConfigBot} {Settings.ConfigGame} {Settings.StartSteam}",
             }; //-noverifyfiles -nofriendsui //-forceservice ?? Run Steam Client Service even if Steam has admin rights.
             Process process1 = new Process()
             {
@@ -88,17 +88,19 @@ public class User
 
     public void ClickCheckInventory(object sender, RoutedEventArgs e)
     { 
-        //CheckInventory();
+        CheckInventory();
     }
+
     public async Task CheckInventory()
     {
-        List<AssetCS> inventory;
+        IReadOnlyCollection<InventoryResponseCS.Asset> inventory;
         var users = JsonConvert.DeserializeObject<User>(File.ReadAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json"));
         Bot newBot = new Bot(users);
         await newBot.Start();
         await Task.Delay(30000);
         inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
-        Msg.ShowInfo(inventory.ToString());
+        IReadOnlyCollection<AssetCS> items = null;
+        (bool success, HashSet<ulong>? mobileTradeOfferIDs) = await newBot.WebHandler.SendTradeOffer(76561198084558331, items, null, "_TOKyI1G");
     }
     
     public void CheckPrime(object sender, RoutedEventArgs e)
@@ -112,7 +114,7 @@ public class User
     {
         if (SharedSecret == null)
         {
-            foreach (string filename in System.IO.Directory.GetFiles(@"D:\Game\SteamSDA\maFiles", "*.maFile"))
+            foreach (string filename in System.IO.Directory.GetFiles($"{Settings.SDA}maFiles", "*.maFile"))
             {
                 var currentUsers = JsonConvert.DeserializeObject<maFile>(File.ReadAllText(filename));
                 if (currentUsers.AccountName == Login)

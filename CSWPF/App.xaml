@@ -48,6 +48,16 @@
             </Style.Resources>
         </Style>
         
+        <Style TargetType="StatusBar" x:Key="StatusBarStyle">
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="35"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="10"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+        
         <Style x:Key="AccentButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#ff4a6d"/>
             <Setter Property="Foreground" Value="White"/>
@@ -98,6 +108,7 @@
                 </Style>
             </Style.Resources>
         </Style>
+        
         
     </Application.Resources>
 </Application>

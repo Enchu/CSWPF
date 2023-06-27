@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CSWPF.Directory;
@@ -15,8 +17,6 @@ namespace CSWPF.Windows
 {
     public partial class MainWindow
     {
-        private Bot bot;
-        //-console -no-browser -window -w 640 -h 480 -novid -nosound +connect 185.255.133.169:20065 192.168.31.220:27015
         private static List<User> _users = new();
         private static void Check()
         {
@@ -34,6 +34,8 @@ namespace CSWPF.Windows
             CreateChildren();
             _users.Clear();
         }
+        
+        public string StatusBarColor { get; set; }
         
         private void CreateChildren()
         {
@@ -103,12 +105,17 @@ namespace CSWPF.Windows
                 checkInventory.Click += db.ClickCheckInventory;
                 stackPanel.Children.Add(checkInventory);
                 
+                //StatusBar
+                /*StatusBar statusBar = new StatusBar();
+                statusBar.Background = Brushes.Red;
+                statusBar.Style = this.FindResource("StatusBarStyle") as Style;
+                stackPanel.Children.Add(statusBar);*/
+
                 PanelForStart.Children.Add(stackPanel);
             }
             
             _users.Clear();
         }
-        
 
         private void AddBtClick(object sender, RoutedEventArgs e)
         {
@@ -152,17 +159,72 @@ namespace CSWPF.Windows
             InitializeComponent();
             Load();
         }
-        
+
+        private void HomeClick(object sender, RoutedEventArgs e)
+        {
+            CollapsedAll(Visibility.Visible);
+            PanelForAdd.Visibility = Visibility.Collapsed;
+            //PanelForSettings.Visibility = Visibility.Collapsed;
+        }
+
         private void AddClick(object sender, RoutedEventArgs e)
         {
             CollapsedAll(Visibility.Collapsed);
             PanelForAdd.Visibility = Visibility.Visible;
+        }
+        
+        private void SDAClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string fileName = $"{Settings.SDA}Steam Desktop Authenticator.exe";
+                new Process()
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        UseShellExecute = false,
+                        FileName = fileName,
+                        WorkingDirectory = new FileInfo(fileName).Directory.FullName
+                    }
+                }.Start();
+            }
+            catch
+            {
+                MessageBox.Show("Не могу открыть программу SDA.exe");
+            }
+        }
+        
+        private void MEMClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string fileName = @"C:\Program Files\Mem Reduct\memreduct.exe";
+                new Process()
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        UseShellExecute = false,
+                        FileName = fileName,
+                        WorkingDirectory = new FileInfo(fileName).Directory.FullName
+                    }
+                }.Start();
+            }
+            catch
+            {
+                MessageBox.Show("Не могу открыть программу MEM.exe");
+            }
         }
 
         private void BackBtClick(object sender, RoutedEventArgs e)
         {
             CollapsedAll(Visibility.Visible);
             PanelForAdd.Visibility = Visibility.Collapsed;
+        }
+
+        private void SettingClick(object sender, RoutedEventArgs e)
+        {
+            CollapsedAll(Visibility.Collapsed);
+            //PanelForSettings.Visibility = Visibility.Visible;
         }
     }
 }

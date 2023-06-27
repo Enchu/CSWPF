@@ -46,6 +46,8 @@ public sealed class WebHandler : IDisposable {
 	private readonly SemaphoreSlim SessionSemaphore = new(1, 1);
 	public static SemaphoreSlim OpenConnectionsSemaphore = new(1, 1);
 	public static SemaphoreSlim RateLimitingSemaphore = new(1, 1);
+	
+	internal static ICrossProcessSemaphore? InventorySemaphore { get; private set; }
 
 	private bool Initialized;
 	private DateTime LastSessionCheck;
@@ -85,7 +87,7 @@ public sealed class WebHandler : IDisposable {
 		return string.IsNullOrEmpty(VanityURL) ? $"/profiles/{Bot.SteamID}" : $"/id/{VanityURL}";
 	}
 
-	public async  Task<List<AssetCS>> GetInventoryAsync(ulong steamID = 0, uint appID = AssetCS.SteamAppID, ulong contextID = AssetCS.SteamCommunityContextID)
+	public async  Task<List<InventoryResponseCS.Asset>> GetInventoryAsync(ulong steamID = 0, uint appID = AssetCS.SteamAppID, ulong contextID = AssetCS.SteamCommunityContextID)
 	{
 		ulong startAssetID = 0;
 		
@@ -96,54 +98,50 @@ public sealed class WebHandler : IDisposable {
 			Uri request = new(SteamCommunityURL, $"/inventory/{steamID}/{appID}/{contextID}?l=english&count={MaxItemsInSingleInventoryRequest}{(startAssetID > 0 ? $"&start_assetid={startAssetID}" : "")}");
 
 			ObjectResponse<InventoryResponseCS>? response = null;
-
 			try
-            {
-                for (byte i = 0; (i < WebBrowser.MaxTries) && (response == null); i++)
-                {
-                    if ((i > 0) && (rateLimitingDelay > 0))
-                    {
-                        await Task.Delay(rateLimitingDelay).ConfigureAwait(false);
-                    }
+			{
+				for (byte i = 0; (i < WebBrowser.MaxTries) && (response == null); i++)
+				{
+					if ((i > 0) && (rateLimitingDelay > 0))
+					{
+						await Task.Delay(rateLimitingDelay).ConfigureAwait(false);
+					}
 
-                    response = await UrlGetToJsonObjectWithSession<InventoryResponseCS>(request, requestOptions: WebBrowser.ERequestOptions.ReturnClientErrors | WebBrowser.ERequestOptions.ReturnServerErrors | WebBrowser.ERequestOptions.AllowInvalidBodyOnErrors, rateLimitingDelay: rateLimitingDelay).ConfigureAwait(false);
+					response = await UrlGetToJsonObjectWithSession<InventoryResponseCS>(request,
+						requestOptions: WebBrowser.ERequestOptions.ReturnClientErrors |
+						                WebBrowser.ERequestOptions.ReturnServerErrors |
+						                WebBrowser.ERequestOptions.AllowInvalidBodyOnErrors,
+						rateLimitingDelay: rateLimitingDelay).ConfigureAwait(false);
 
-                    if (response == null)
-                    {
-                        return null;
-                    }
-                    if (Helper.IsClientErrorCode(response.StatusCode))
-                    {
-	                    return null;
-                    }
+					if (response == null || Helper.IsClientErrorCode(response.StatusCode))
+					{
+						return null;
+					}
 
-                    if (Helper.IsServerErrorCode(response.StatusCode))
-                    {
-	                    if (string.IsNullOrEmpty(response.Content?.ErrorText))
-	                    {
-		                    // This is a generic server error without a reason, try again
-		                    response = null;
+					if (Helper.IsServerErrorCode(response.StatusCode))
+					{
+						return null;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Msg.ShowError("" + ex.ToString());
+			}
+			finally {
+				if (rateLimitingDelay == 0) {
+					InventorySemaphore.Release();
+				} else {
+					Utilities.InBackground(
+						async () => {
+							await Task.Delay(rateLimitingDelay).ConfigureAwait(false);
+							InventorySemaphore.Release();
+						}
+					);
+				}
+			}
 
-		                    continue;
-	                    }
-
-	                    // Interpret the reason and see if we should try again
-	                    // ReSharper disable once RedundantSuppressNullableWarningExpression - required for .NET Framework
-	                    switch (response.Content!.ErrorCode)
-	                    {
-		                    case EResult.DuplicateRequest:
-		                    case EResult.ServiceUnavailable:
-			                    response = null;
-
-			                    continue;
-	                    }
-	                    return null;
-                    }
-                }
-            }
-            finally { }
-
-            if (response?.Content == null)
+			if (response?.Content == null)
             {
                 return null;
             }
@@ -165,41 +163,28 @@ public sealed class WebHandler : IDisposable {
 
             assetIDs ??= new HashSet<ulong>((int)response.Content.TotalInventoryCount);
 
-            if ((response.Content.Assets.Count == 0) || (response.Content.Descriptions.Count == 0))
+            if ((response.Content.Assets.Count() == 0) || (response.Content.Descriptions.Count() == 0))
             {
                 return null;
             }
 
             Dictionary<(ulong ClassID, ulong InstanceID), InventoryResponseCS.Description> descriptions = new();
 
-            List<AssetCS> AssetListStatement = new List<AssetCS>();
+            List<InventoryResponseCS.Asset> AssetListStatement = new List<InventoryResponseCS.Asset>();
 
-            foreach (AssetCS asset in response.Content.Assets)
+            foreach (InventoryResponseCS.Asset asset in response.Content.Assets)
             {
-                if (!descriptions.TryGetValue((asset.ClassID, asset.InstanceID), out InventoryResponseCS.Description? description) || !assetIDs.Add(asset.AssetID))
+                /*if (!descriptions.TryGetValue((asset.Classid, asset.Instanceid), out InventoryResponseCS.Description? description) || !assetIDs.Add(asset.Assetid))
                 {
                     continue;
                 }
 
-                asset.Marketable = description.Marketable;
                 asset.Tradable = description.Tradable;
-                asset.Tags = description.Tags;
+                asset.Marketable = description.Marketable;
+                asset.Tags = description.Tags;*/
 
                 AssetListStatement.Add(asset);
             }
-
-            if (!response.Content.MoreItems)
-            {
-                //break;
-            }
-
-            if (response.Content.LastAssetID == 0)
-            {
-                return null;
-            }
-
-            startAssetID = response.Content.LastAssetID;
-
             return AssetListStatement;
 	}
 
@@ -281,7 +266,7 @@ public sealed class WebHandler : IDisposable {
 		return await UrlPostWithSession(request, data: data, session: ESession.CamelCase).ConfigureAwait(false);
 	}
 
-	public async Task<(bool Success, HashSet<ulong>? MobileTradeOfferIDs)> SendTradeOffer(ulong steamID, IReadOnlyCollection<AssetSteam>? itemsToGive = null, IReadOnlyCollection<AssetSteam>? itemsToReceive = null, string? token = null, bool forcedSingleOffer = false, ushort itemsPerTrade = 255) {
+	public async Task<(bool Success, HashSet<ulong>? MobileTradeOfferIDs)> SendTradeOffer(ulong steamID, IReadOnlyCollection<AssetCS>? itemsToGive = null, IReadOnlyCollection<AssetCS>? itemsToReceive = null, string? token = null, bool forcedSingleOffer = false, ushort itemsPerTrade = 255) {
 		if ((steamID == 0) || !new SteamID(steamID).IsIndividualAccount) {
 			throw new ArgumentOutOfRangeException(nameof(steamID));
 		}
@@ -298,7 +283,7 @@ public sealed class WebHandler : IDisposable {
 		HashSet<TradeOfferSendRequest> trades = new() { singleTrade };
 
 		if (itemsToGive != null) {
-			foreach (AssetSteam itemToGive in itemsToGive) {
+			foreach (AssetCS itemToGive in itemsToGive) {
 				if (!forcedSingleOffer && (singleTrade.ItemsToGive.Assets.Count + singleTrade.ItemsToReceive.Assets.Count >= itemsPerTrade)) {
 					if (trades.Count >= 255) {
 						break;
@@ -309,12 +294,11 @@ public sealed class WebHandler : IDisposable {
 				}
 
 				singleTrade.ItemsToGive.Assets.Add(itemToGive);
-				//singleTrade.ItemsToGive.Assets.Add(itemToGive);
 			}
 		}
 
 		if (itemsToReceive != null) {
-			foreach (AssetSteam itemToReceive in itemsToReceive) {
+			foreach (AssetCS itemToReceive in itemsToReceive) {
 				if (!forcedSingleOffer && (singleTrade.ItemsToGive.Assets.Count + singleTrade.ItemsToReceive.Assets.Count >= itemsPerTrade)) {
 					if (trades.Count >= 255) {
 						break;

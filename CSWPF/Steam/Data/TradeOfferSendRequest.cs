@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CSWPF.Directory;
 using Newtonsoft.Json;
 
 namespace CSWPF.Steam.Data;
@@ -12,6 +13,6 @@ internal sealed class TradeOfferSendRequest {
 
     internal sealed class ItemList {
         [JsonProperty("assets", Required = Required.Always)]
-        internal readonly HashSet<AssetSteam> Assets = new();
+        internal readonly HashSet<AssetCS> Assets = new();
     }
 }

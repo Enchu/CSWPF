@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
         Title="MainWindow" MinHeight="450" MinWidth="800"
         FontFamily="Tahoma"
@@ -17,13 +18,27 @@
         
         <Grid Grid.Row="0">
             <StackPanel Name="PanelIcons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
+                
+                <Button Width="32" Height="32" Click="HomeClick" Style="{StaticResource ImageButtonStyle}" >
+                    <Image Stretch="Uniform" Source="../Icons/home.png"/>
+                </Button>
+                
                 <Button Width="32" Height="32" Click="AddClick" Style="{StaticResource ImageButtonStyle}" >
                     <Image Stretch="Uniform" Source="../Icons/plus.png"/>
                 </Button>
                 
-                <Button Width="32" Height="32"  Style="{StaticResource ImageButtonStyle}">
+                <Button Width="32" Height="32" Click="SettingClick" Style="{StaticResource ImageButtonStyle}">
                     <Image Stretch="Uniform" Source="../Icons/gear.png"/>
                 </Button>
+                
+                <Button Width="32" Height="32" Click="SDAClick"  Style="{StaticResource ImageButtonStyle}">
+                    <Image Stretch="Uniform" Source="../Icons/sda.png"/>
+                </Button>
+                
+                <Button Width="32" Height="32" Click="MEMClick"  Style="{StaticResource ImageButtonStyle}">
+                    <Image Stretch="Uniform" Source="../Icons/mem.ico"/>
+                </Button>
+                
             </StackPanel>
             
             <Button Visibility="Collapsed" Click="AddClick" Width="200" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0" Content="Добавить новый аккаунт"/>
@@ -32,17 +47,17 @@
         
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
             <StackPanel Grid.Column="0" Name="PanelFor"/>
-            <StackPanel Grid.Column="1" Name="PanelForLogin" />
-            <StackPanel Grid.Column="2" Name="PanelForPassword"/>
+            <StackPanel Grid.Column="1" Name="PanelForLogin"/>
+            <StackPanel Grid.Column="2" Name="PanelForPassword" />
             <StackPanel Grid.Column="3" Name="PanelForStart" Orientation="Vertical"/>
             <StackPanel Grid.Column="4" Name="PanelForKill"/>
             <StackPanel Grid.Column="5" Name="PanelForOpenSteam"/>
@@ -56,7 +71,6 @@
                 <Button Click="AddBtClick" Width="150" Height="40" Margin="5" Content="Добавить"/>
                 <Button Click="BackBtClick" Width="150" Height="40" Margin="5" Content="Назад"/>
             </StackPanel>
-                
         </StackPanel>
         
     </Grid>
