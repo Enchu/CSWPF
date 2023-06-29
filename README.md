@@ -4,7 +4,7 @@ Bots for any game
 # Tasks:
 - [X] Farm
 - [X] WEB
-  - [ ] Open inventory
+  - [X] Open inventory
   - [ ] Trade offer
   - [ ] Invite
 - [ ] Create account
