@@ -9,10 +9,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using AngleSharp.Dom;
 using CSWPF.Directory;
-using CSWPF.Helpers;
 using CSWPF.Steam;
 using CSWPF.Steam.Data;
 using CSWPF.Utils;
@@ -20,8 +18,8 @@ using CSWPF.Web.Core;
 using CSWPF.Web.Responses;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SteamAuth;
 using SteamKit2;
+using Confirmation = CSWPF.Steam.Security.Confirmation;
 
 namespace CSWPF.Web;
 
@@ -113,13 +111,11 @@ public sealed class WebHandler : IDisposable {
 						                WebBrowser.ERequestOptions.AllowInvalidBodyOnErrors,
 						rateLimitingDelay: rateLimitingDelay).ConfigureAwait(false);
 
-					if (response == null || Helper.IsClientErrorCode(response.StatusCode))
-					{
+					if (response.StatusCode.IsClientErrorCode()) {
 						return null;
 					}
 
-					if (Helper.IsServerErrorCode(response.StatusCode))
-					{
+					if (response.StatusCode.IsServerErrorCode()) {
 						return null;
 					}
 				}
@@ -266,7 +262,7 @@ public sealed class WebHandler : IDisposable {
 		return await UrlPostWithSession(request, data: data, session: ESession.CamelCase).ConfigureAwait(false);
 	}
 
-	public async Task<(bool Success, HashSet<ulong>? MobileTradeOfferIDs)> SendTradeOffer(ulong steamID, IReadOnlyCollection<AssetCS>? itemsToGive = null, IReadOnlyCollection<AssetCS>? itemsToReceive = null, string? token = null, bool forcedSingleOffer = false, ushort itemsPerTrade = 255) {
+	public async Task<(bool Success, HashSet<ulong>? TradeOfferIDs, HashSet<ulong>? MobileTradeOfferIDs)> SendTradeOffer(ulong steamID, IReadOnlyCollection<AssetCS>? itemsToGive = null, IReadOnlyCollection<AssetCS>? itemsToReceive = null, string? token = null, bool forcedSingleOffer = false, ushort itemsPerTrade = 255) {
 		if ((steamID == 0) || !new SteamID(steamID).IsIndividualAccount) {
 			throw new ArgumentOutOfRangeException(nameof(steamID));
 		}
@@ -320,8 +316,10 @@ public sealed class WebHandler : IDisposable {
 			{ "partner", steamID.ToString(CultureInfo.InvariantCulture) },
 			{ "serverid", "1" },
 			{ "trade_offer_create_params", !string.IsNullOrEmpty(token) ? new JObject { { "trade_offer_access_token", token } }.ToString(Formatting.None) : "" },
+			{ "tradeoffermessage", string.Empty }
 		};
 
+		HashSet<ulong> tradeOfferIDs = new(trades.Count);
 		HashSet<ulong> mobileTradeOfferIDs = new(trades.Count);
 
 		foreach (TradeOfferSendRequest trade in trades) {
@@ -333,10 +331,10 @@ public sealed class WebHandler : IDisposable {
 				response = await UrlPostToJsonObjectWithSession<TradeOfferSendResponse>(request, data: data, referer: referer, requestOptions: WebBrowser.ERequestOptions.ReturnServerErrors | WebBrowser.ERequestOptions.AllowInvalidBodyOnErrors).ConfigureAwait(false);
 
 				if (response == null) {
-					return (false, mobileTradeOfferIDs);
+					return (false, tradeOfferIDs, mobileTradeOfferIDs);
 				}
 
-				if (Core.Utilities.IsServerErrorCode(response.StatusCode)) {
+				if (response.StatusCode.IsServerErrorCode()) {
 					if (string.IsNullOrEmpty(response.Content?.ErrorText)) {
 						// This is a generic server error without a reason, try again
 						response = null;
@@ -346,24 +344,26 @@ public sealed class WebHandler : IDisposable {
 
 					// This is actually client error with a reason, so it doesn't make sense to retry
 					// ReSharper disable once RedundantSuppressNullableWarningExpression - required for .NET Framework
-					return (false, mobileTradeOfferIDs);
+					return (false, tradeOfferIDs, mobileTradeOfferIDs);
 				}
 			}
 
 			if (response?.Content == null) {
-				return (false, mobileTradeOfferIDs);
+				return (false, tradeOfferIDs, mobileTradeOfferIDs);
 			}
 
 			if (response.Content.TradeOfferID == 0) {
-				return (false, mobileTradeOfferIDs);
+				return (false, tradeOfferIDs, mobileTradeOfferIDs);
 			}
+
+			tradeOfferIDs.Add(response.Content.TradeOfferID);
 
 			if (response.Content.RequiresMobileConfirmation) {
 				mobileTradeOfferIDs.Add(response.Content.TradeOfferID);
 			}
 		}
 
-		return (true, mobileTradeOfferIDs);
+		return (true, tradeOfferIDs, mobileTradeOfferIDs);
 	}
 	
 	public async Task<HtmlDocumentResponse?> UrlGetToHtmlDocumentWithSession(Uri request, IReadOnlyCollection<KeyValuePair<string, string>>? headers = null, Uri? referer = null, WebBrowser.ERequestOptions requestOptions = WebBrowser.ERequestOptions.None, bool checkSessionPreemptively = true, byte maxTries = WebBrowser.MaxTries, int rateLimitingDelay = 0, bool allowSessionRefresh = true) {
@@ -1000,7 +1000,7 @@ public sealed class WebHandler : IDisposable {
 			await RateLimitingSemaphore.WaitAsync().ConfigureAwait(false);
 
 			// We release rate-limiter semaphore regardless of our task completion, since we use that one only to guarantee rate-limiting of their creation
-			Helper.InBackground(
+			Utilities.InBackground(
 				async () =>
 				{
 					await Task.Delay(300).ConfigureAwait(false);
@@ -1327,7 +1327,7 @@ public sealed class WebHandler : IDisposable {
 		return response?.Content?.Success;
 	}
 
-	internal async Task<bool?> HandleConfirmations(string deviceID, string confirmationHash, ulong time, IReadOnlyCollection<Confirmation> confirmations, bool accept) {
+	internal async Task<bool?> HandleConfirmations(string deviceID, string confirmationHash, ulong time, IReadOnlyCollection<Steam.Security.Confirmation> confirmations, bool accept) {
 		if (string.IsNullOrEmpty(deviceID)) {
 			throw new ArgumentNullException(nameof(deviceID));
 		}

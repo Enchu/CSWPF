@@ -13,7 +13,9 @@ using System.Threading.Tasks;
 using CSWPF.Directory;
 using CSWPF.Helpers;
 using CSWPF.Steam.Integration;
+using CSWPF.Steam.Interaction;
 using CSWPF.Steam.Plugns;
+using CSWPF.Steam.Storage;
 using CSWPF.Utils;
 using CSWPF.Web;
 using CSWPF.Web.Core;
@@ -40,15 +42,17 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 
 	private static readonly SemaphoreSlim BotsSemaphore = new(1, 1);
 	public WebHandler WebHandler { get; set; }
+	public Actions Actions { get; }
 
 	[JsonProperty]
 	public string BotName { get; }
 	[JsonProperty]
-	public bool IsConnectedAndLoggedOn => SteamClient.SteamID != null;
+	public static bool IsConnectedAndLoggedOn => SteamClient.SteamID != null;
 
 	[JsonIgnore]
 	public SteamConfiguration SteamConfiguration { get; }
-
+	internal static readonly BotDatabase BotDatabase;
+	public bool HasMobileAuthenticator => BotDatabase.MobileAuthenticator != null;
 	[JsonIgnore]
 	public SteamFriends SteamFriends { get; }
 	
@@ -62,7 +66,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 	private readonly SemaphoreSlim InitializationSemaphore = new(1, 1);
 	private readonly SemaphoreSlim MessagingSemaphore = new(1, 1);
 	private readonly SemaphoreSlim SendCompleteTypesSemaphore = new(1, 1);
-	private readonly SteamClient SteamClient;
+	private static SteamClient SteamClient;
 	private readonly SteamUser SteamUser;
 
 	private IEnumerable<(string FilePath, EFileType FileType)> RelatedFiles {
@@ -79,10 +83,6 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 			}
 		}
 	}
-
-	/// <remarks>
-	///     Login keys are not guaranteed to be valid, we should use them only if we don't have full details available from the user
-	/// </remarks>
 
 	[JsonProperty($"{SharedInfo.UlongCompatibilityStringPrefix}{nameof(SteamID)}")]
 	private string SSteamID => SteamID.ToString(CultureInfo.InvariantCulture);
@@ -136,8 +136,9 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 	public Bot(User userConfig)
 	{
 		user = userConfig;
+		
 		//BotDatabase.MobileAuthenticator?.Init(this);
-
+		
 		WebHandler = new WebHandler(this);
 
 		SteamConfiguration = SteamConfiguration.Create(
@@ -290,7 +291,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 		}
 
 		KeepRunning = true;
-		Helper.InBackground(HandleCallbacks, true);
+		Utilities.InBackground(HandleCallbacks, true);
 
 		await Connect().ConfigureAwait(false);
 	}

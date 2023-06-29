@@ -19,24 +19,28 @@
         <Grid Grid.Row="0">
             <StackPanel Name="PanelIcons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
                 
-                <Button Width="32" Height="32" Click="HomeClick" Style="{StaticResource ImageButtonStyle}" >
+                <Button Width="32" Height="32" Margin="5" Click="HomeClick" Style="{StaticResource ImageButtonStyle}" >
                     <Image Stretch="Uniform" Source="../Icons/home.png"/>
                 </Button>
                 
-                <Button Width="32" Height="32" Click="AddClick" Style="{StaticResource ImageButtonStyle}" >
+                <Button Width="32" Height="32" Margin="5" Click="AddClick" Style="{StaticResource ImageButtonStyle}" >
                     <Image Stretch="Uniform" Source="../Icons/plus.png"/>
                 </Button>
                 
-                <Button Width="32" Height="32" Click="SettingClick" Style="{StaticResource ImageButtonStyle}">
+                <Button Width="32" Height="32" Margin="5" Click="SettingClick" Style="{StaticResource ImageButtonStyle}">
                     <Image Stretch="Uniform" Source="../Icons/gear.png"/>
                 </Button>
                 
-                <Button Width="32" Height="32" Click="SDAClick"  Style="{StaticResource ImageButtonStyle}">
+                <Button Width="32" Height="32" Margin="5" Click="SDAClick"  Style="{StaticResource ImageButtonStyle}">
                     <Image Stretch="Uniform" Source="../Icons/sda.png"/>
                 </Button>
                 
-                <Button Width="32" Height="32" Click="MEMClick"  Style="{StaticResource ImageButtonStyle}">
+                <Button Width="32" Height="32" Margin="5" Click="MEMClick"  Style="{StaticResource ImageButtonStyle}">
                     <Image Stretch="Uniform" Source="../Icons/mem.ico"/>
+                </Button>
+                
+                <Button Width="32" Height="32" Margin="5" Click="ToolClick"  Style="{StaticResource ImageButtonStyle}">
+                    <Image Stretch="Uniform" Source="../Icons/wifi.ico"/>
                 </Button>
                 
             </StackPanel>

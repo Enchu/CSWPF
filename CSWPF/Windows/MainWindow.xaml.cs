@@ -215,6 +215,27 @@ namespace CSWPF.Windows
             }
         }
 
+        private void ToolClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string fileName = @"\D:\Game\SteamRootTools\SteamRouteTool.exe";
+                new Process()
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        UseShellExecute = false,
+                        FileName = fileName,
+                        WorkingDirectory = new FileInfo(fileName).Directory.FullName
+                    }
+                }.Start();
+            }
+            catch
+            {
+                MessageBox.Show("Не могу открыть программу Tool.exe");
+            }
+        }
+
         private void BackBtClick(object sender, RoutedEventArgs e)
         {
             CollapsedAll(Visibility.Visible);

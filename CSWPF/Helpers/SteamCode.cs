@@ -4,8 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using CSWPF.Directory;
+using CSWPF.Utils;
+using SteamKit2;
+using Point = System.Drawing.Point;
 
 namespace CSWPF.Helpers;
 
@@ -25,6 +29,7 @@ public static class SteamCode
         IEnumerable<Process> SteamProcesses = Process.GetProcesses().Where(pr => pr.ProcessName.ToLower().Contains($"steam_{user.SteamID}"));
         string code = await TwoFactory.GenerateSteamGuardCode(TwoFactory.GetSteamTime(), user.SharedSecret);
         await Task.Delay(defaulttime);
+        
         SetForegroundWindow(SteamProcesses.First().MainWindowHandle);
         await Task.Delay(defaulttime);
         foreach (char item in code)

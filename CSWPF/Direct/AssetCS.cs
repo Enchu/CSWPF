@@ -10,18 +10,29 @@ namespace CSWPF.Directory;
 
 public class AssetCS
 {
-    public const uint SteamAppID = 730;
+	public const uint SteamAppID = 730;
     public const ulong SteamCommunityContextID = 2;
-    
-    [JsonProperty("appid", Required = Required.DisallowNull)]
-	public long AppID { get; private set; }
-	
-	[System.Text.Json.Serialization.JsonIgnore]
-	public long ContextID { get; private set; }
-	
-	[System.Text.Json.Serialization.JsonIgnore]
-	public long Amount { get; internal set; }
+    [JsonProperty("appid")]
+    public uint AppID { get; set; }
+    [JsonProperty("contextid")]
+    public string ContextID { get; set; }
+    [JsonProperty("amount")]
+    public uint Amount { get; set; }
+    [JsonProperty("assetid")]
+    public string AssetID { get; set; }
+    [JsonProperty("classid")]
+    public ulong ClassID { get; set; }
+    [JsonProperty("instanceid")]
+    public ulong InstanceID { get; set; }
+    [JsonIgnore]
+    public bool Tradable { get; set; }
+    [JsonIgnore]
+    public string MarketName = null;
+    [JsonIgnore]
+    public bool Marketable;
+    [JsonConstructor]
+    public AssetCS()
+    {
 
-	[System.Text.Json.Serialization.JsonIgnore]
-	public ulong AssetID { get; private set; }
+    }
 }

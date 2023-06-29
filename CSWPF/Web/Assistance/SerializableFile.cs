@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CSWPF.Utils;
 using Newtonsoft.Json;
 
-namespace CSWPF.Web.Helpe;
+namespace CSWPF.Web.Assistance;
 
 public abstract class SerializableFile : IDisposable {
 	private static readonly SemaphoreSlim GlobalFileSemaphore = new(1, 1);

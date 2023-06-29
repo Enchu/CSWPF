@@ -8,7 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using CSWPF.Utils;
 using CSWPF.Web.Core;
-using CSWPF.Web.Helpe;
+using CSWPF.Web.Assistance;
 using JetBrains.Annotations;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;

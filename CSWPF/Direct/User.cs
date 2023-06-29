@@ -14,6 +14,7 @@ using CSWPF.Web;
 using System.Linq;
 using CSWPF.Steam;
 using CSWPF.Steam.Data;
+using CSWPF.Steam.Security;
 using Newtonsoft.Json;
 
 namespace CSWPF.Directory;
@@ -99,8 +100,23 @@ public class User
         await newBot.Start();
         await Task.Delay(30000);
         inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
-        IReadOnlyCollection<AssetCS> items = null;
-        (bool success, HashSet<ulong>? mobileTradeOfferIDs) = await newBot.WebHandler.SendTradeOffer(76561198084558331, items, null, "_TOKyI1G");
+        IReadOnlyCollection<AssetCS> items = inventory.Select(asset => new AssetCS
+        {
+            AppID = asset.Appid,
+            ContextID = asset.Contextid,
+            Amount = asset.Amount,
+            AssetID = asset.Assetid
+        }).ToList();
+        
+        (bool success, _, HashSet<ulong>? mobileTradeOfferIDs) = await newBot.WebHandler.SendTradeOffer(76561198084558331, items, null, "_TOKyI1G").ConfigureAwait(false);
+        
+        if ((mobileTradeOfferIDs?.Count > 0) && newBot.HasMobileAuthenticator) {
+            (bool twoFactorSuccess, _, _) = await newBot.Actions.HandleTwoFactorAuthenticationConfirmations(true, Confirmation.EType.Trade, mobileTradeOfferIDs, true).ConfigureAwait(false);
+
+            if (!twoFactorSuccess) {
+                Msg.ShowError(nameof(twoFactorSuccess));
+            }
+        }
     }
     
     public void CheckPrime(object sender, RoutedEventArgs e)

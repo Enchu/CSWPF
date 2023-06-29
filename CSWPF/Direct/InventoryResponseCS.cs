@@ -1,145 +1,136 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using CSWPF.Steam.Data;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using SteamKit2;
 
 namespace CSWPF.Directory;
 
 public class InventoryResponseCS: OptionalResultResponse {
-	
-	[JsonProperty("assets", Required = Required.DisallowNull)]
-	internal readonly ImmutableList<AssetCS> Assets = ImmutableList<AssetCS>.Empty; 
-	[JsonProperty("descriptions", Required = Required.DisallowNull)]
-	internal readonly ImmutableHashSet<Description> Descriptions = ImmutableHashSet<Description>.Empty;
+    
+        [JsonProperty("assets")]
+        public Asset[] Assets { get; set; }
 
-	[JsonProperty("total_inventory_count", Required = Required.DisallowNull)]
-	internal readonly uint TotalInventoryCount;
+        [JsonProperty("descriptions")]
+        public Description[] Descriptions { get; set; }
 
-	internal EResult? ErrorCode { get; private set; }
-	internal string? ErrorText { get; private set; }
-	internal ulong LastAssetID { get; private set; }
-	internal bool MoreItems { get; private set; }
+        [JsonProperty("total_inventory_count")]
+        public long TotalInventoryCount { get; set; }
 
-	[JsonProperty("error", Required = Required.DisallowNull)]
-	private string Error
-	{
-		set
-		{
-			if (string.IsNullOrEmpty(value))
-			{
-				return;
-			}
+        [JsonProperty("rwgrsn")]
+        public long Rwgrsn { get; set; }
 
-			//ErrorCode = SteamUtilities.InterpretError(value);
-			ErrorText = value;
-		}
-	}
+    public class Asset
+    {
+        [JsonProperty("appid")]
+        public uint  Appid { get; set; }
+        [JsonProperty("contextid")]
+        public string  Contextid { get; set; }
+        [JsonProperty("amount")]
+        public uint  Amount { get; set; }
+        [JsonProperty("assetid")]
+        public string  Assetid { get; set; }
+        [JsonProperty("classid")]
+        public ulong Classid { get; set; }
+        [JsonProperty("instanceid")]
+        public ulong Instanceid { get; set; }
+        [JsonProperty("tradable")]
+        public bool  Tradable { get; set; }
+        [JsonProperty("marketable")]
+        public bool Marketable { get; set; }
+        [JsonProperty("tags")]
+        public Tag[] Tags { get; set; }
+    }
 
-	[JsonConstructor]
-	private InventoryResponseCS()
-	{
-	}
+    public class Description
+    {
+        [JsonProperty("appid")]
+        public long Appid { get; set; }
 
-	internal sealed class Description
-	{
-		internal uint RealAppID
-		{
-			get
-			{
-				foreach (Tag tag in Tags)
-				{
-					switch (tag.Identifier)
-					{
-						case "Game":
-							if (string.IsNullOrEmpty(tag.Value) || (tag.Value.Length <= 4) ||
-							    !tag.Value.StartsWith("app_", StringComparison.Ordinal))
-							{
-								break;
-							}
+        [JsonProperty("classid")]
+        public string Classid { get; set; }
 
-							string appIDText = tag.Value[4..];
+        [JsonProperty("instanceid")]
+        public long Instanceid { get; set; }
 
-							if (!uint.TryParse(appIDText, out uint appID) || (appID == 0))
-							{
-								break;
-							}
+        [JsonProperty("currency")]
+        public long Currency { get; set; }
 
-							return appID;
-					}
-				}
-				return 0;
-			}
-		}
-		
-		[JsonProperty("appid", Required = Required.Always)]
-		internal uint AppID { get; set; }
+        [JsonProperty("background_color")]
+        public string BackgroundColor { get; set; }
 
-		internal ulong ClassID { get; set; }
-		internal ulong InstanceID { get; set; }
-		internal bool Marketable { get; set; }
+        [JsonProperty("icon_url")]
+        public string IconUrl { get; set; }
+        [JsonProperty("descriptions")]
+        public DescriptionDescription[] Descriptions { get; set; }
+        
+        [JsonProperty("tradable")]
+        public long Tradable { get; set; }
 
-		[JsonProperty("tags", Required = Required.DisallowNull)]
-		internal ImmutableHashSet<Tag> Tags { get; set; } = ImmutableHashSet<Tag>.Empty;
+        [JsonProperty("name")]
+        public string Name { get; set; }
 
-		internal bool Tradable { get; set; }
+        [JsonProperty("name_color")]
+        public string NameColor { get; set; }
 
-		[JsonProperty("classid", Required = Required.Always)]
-		private string ClassIDText
-		{
-			set
-			{
-				if (string.IsNullOrEmpty(value))
-				{
-					return;
-				}
+        [JsonProperty("type")]
+        public string Type { get; set; }
 
-				if (!ulong.TryParse(value, out ulong classID) || (classID == 0))
-				{
-					return;
-				}
+        [JsonProperty("market_name")]
+        public string MarketName { get; set; }
 
-				ClassID = classID;
-			}
-		}
+        [JsonProperty("market_hash_name")]
+        public string MarketHashName { get; set; }
 
-		[JsonProperty("instanceid", Required = Required.DisallowNull)]
-		private string InstanceIDText
-		{
-			set
-			{
-				if (string.IsNullOrEmpty(value))
-				{
-					return;
-				}
+        [JsonProperty("commodity")]
+        public long Commodity { get; set; }
 
-				if (!ulong.TryParse(value, out ulong instanceID))
-				{
-					return;
-				}
+        [JsonProperty("market_tradable_restriction")]
+        public long MarketTradableRestriction { get; set; }
 
-				InstanceID = instanceID;
-			}
-		}
+        [JsonProperty("marketable")]
+        public long Marketable { get; set; }
 
-		[JsonProperty("marketable", Required = Required.Always)]
-		private byte MarketableNumber
-		{
-			set => Marketable = value > 0;
-		}
+        [JsonProperty("tags")]
+        public Tag[] Tags { get; set; }
 
-		[JsonProperty("tradable", Required = Required.Always)]
-		private byte TradableNumber
-		{
-			set => Tradable = value > 0;
-		}
+        [JsonProperty("market_buy_country_restriction")]
+        public string MarketBuyCountryRestriction { get; set; }
+    }
+    
+    public enum TypeEnum { Html };
+    public partial class DescriptionDescription
+    {
+        [JsonProperty("type")]
+        public TypeEnum Type { get; set; }
 
-		[JsonConstructor]
-		internal Description()
-		{
-		}
-	}
+        [JsonProperty("value")]
+        public string Value { get; set; }
+
+        [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
+        public string Color { get; set; }
+    }
+
+    public class Tag
+    {
+        [JsonProperty("category")]
+        public string Category { get; set; }
+
+        [JsonProperty("internal_name")]
+        public string InternalName { get; set; }
+
+        [JsonProperty("localized_category_name")]
+        public string LocalizedCategoryName { get; set; }
+
+        [JsonProperty("localized_tag_name")]
+        public string LocalizedTagName { get; set; }
+
+        [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
+        public string Color { get; set; }
+    }
 }

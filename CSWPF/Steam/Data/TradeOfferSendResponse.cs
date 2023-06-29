@@ -17,14 +17,10 @@ internal sealed class TradeOfferSendResponse {
     private string TradeOfferIDText {
         set {
             if (string.IsNullOrEmpty(value)) {
-                Msg.ShowError(value);
-
                 return;
             }
 
             if (!ulong.TryParse(value, out ulong tradeOfferID) || (tradeOfferID == 0)) {
-                Msg.ShowError("" + tradeOfferID);
-
                 return;
             }
 
@@ -32,6 +28,6 @@ internal sealed class TradeOfferSendResponse {
         }
     }
 
-    [System.Text.Json.Serialization.JsonConstructor]
+    [JsonConstructor]
     private TradeOfferSendResponse() { }
 }
