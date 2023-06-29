@@ -5,7 +5,7 @@ Bots for any game
 - [X] Farm
 - [X] WEB
   - [X] Open inventory
-  - [ ] Trade offer
+  - [X] Trade offer
   - [ ] Invite
 - [ ] Create account
 
