@@ -1,0 +1,30 @@
+﻿<Window x:Class="CSWPF.Windows.InputForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:CSWPF.Windows"
+        mc:Ignorable="d"
+        Title="InputForm" MinHeight="300" MinWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Label Name="labelText" Content="Sample Text~~~" Width="400" Height="150"/>
+        </Grid>
+        
+        <Grid Grid.Row="1">
+            <TextBox Name="txtBox"/>
+        </Grid>
+        
+        <Grid Grid.Row="2">
+            <Button Name="btnAccept" Click="BtnAccept_OnClick" Content="Accept" HorizontalAlignment="Left" Margin="30 0 0 0"/>
+            <Button Name="btnCancel" Click="BtnCancel_OnClick" Content="Cancel" HorizontalAlignment="Right" Margin="0 0 30 0"/>
+        </Grid>
+        
+    </Grid>
+</Window>

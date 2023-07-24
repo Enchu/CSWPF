@@ -1,0 +1,15 @@
+D:\RABITA\Rider\CSWPF\Launcher\bin\Debug\net7.0\Launcher.exe
+D:\RABITA\Rider\CSWPF\Launcher\bin\Debug\net7.0\Launcher.deps.json
+D:\RABITA\Rider\CSWPF\Launcher\bin\Debug\net7.0\Launcher.runtimeconfig.json
+D:\RABITA\Rider\CSWPF\Launcher\bin\Debug\net7.0\Launcher.dll
+D:\RABITA\Rider\CSWPF\Launcher\bin\Debug\net7.0\Launcher.pdb
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.csproj.AssemblyReference.cache
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.GeneratedMSBuildEditorConfig.editorconfig
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.AssemblyInfoInputs.cache
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.AssemblyInfo.cs
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.csproj.CoreCompileInputs.cache
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.dll
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\refint\Launcher.dll
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.pdb
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\Launcher.genruntimeconfig.cache
+D:\RABITA\Rider\CSWPF\Launcher\obj\Debug\net7.0\ref\Launcher.dll
