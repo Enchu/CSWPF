@@ -1450,31 +1450,34 @@
           }
         }
       },
-      "protobuf-net/3.0.101": {
+      "protobuf-net/3.2.16": {
         "type": "package",
         "dependencies": {
-          "protobuf-net.Core": "3.0.101"
+          "protobuf-net.Core": "3.2.16"
         },
         "compile": {
-          "lib/net5.0/protobuf-net.dll": {
+          "lib/net6.0/protobuf-net.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net5.0/protobuf-net.dll": {
+          "lib/net6.0/protobuf-net.dll": {
             "related": ".xml"
           }
         }
       },
-      "protobuf-net.Core/3.0.101": {
+      "protobuf-net.Core/3.2.16": {
         "type": "package",
+        "dependencies": {
+          "System.Collections.Immutable": "7.0.0"
+        },
         "compile": {
-          "lib/net5.0/protobuf-net.Core.dll": {
+          "lib/net6.0/protobuf-net.Core.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net5.0/protobuf-net.Core.dll": {
+          "lib/net6.0/protobuf-net.Core.dll": {
             "related": ".xml"
           }
         }
@@ -1638,11 +1641,11 @@
           }
         }
       },
-      "SteamKit2/2.4.1": {
+      "SteamKit2/2.5.0-Beta.1": {
         "type": "package",
         "dependencies": {
           "Microsoft.Win32.Registry": "5.0.0",
-          "protobuf-net": "3.0.101"
+          "protobuf-net": "3.2.16"
         },
         "compile": {
           "lib/net6.0/SteamKit2.dll": {
@@ -1653,6 +1656,22 @@
           "lib/net6.0/SteamKit2.dll": {
             "related": ".pdb;.xml"
           }
+        }
+      },
+      "System.Collections.Immutable/7.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net7.0/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net7.0/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
         }
       },
       "System.Configuration.ConfigurationManager/6.0.1": {
@@ -4633,46 +4652,42 @@
         "postgresql.png"
       ]
     },
-    "protobuf-net/3.0.101": {
-      "sha512": "mLm8VGfGylp9q+rbJDp3uw0BOeNzfGENecVz/EYGlzq3ss7tfajGXHCMoZm/GxJ9vSn9pcK22UXWZnQ5GJQMjA==",
+    "protobuf-net/3.2.16": {
+      "sha512": "W6RM2B2f5O7SigBGfkXFYzI/a7Mks+rCHtuGlE/b5O3NMupDon7I0akjCLhrfcnqIfdWDkDafseav/MnIzUSHA==",
       "type": "package",
-      "path": "protobuf-net/3.0.101",
+      "path": "protobuf-net/3.2.16",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "lib/net461/protobuf-net.dll",
-        "lib/net461/protobuf-net.xml",
-        "lib/net5.0/protobuf-net.dll",
-        "lib/net5.0/protobuf-net.xml",
-        "lib/netcoreapp3.1/protobuf-net.dll",
-        "lib/netcoreapp3.1/protobuf-net.xml",
+        "lib/net462/protobuf-net.dll",
+        "lib/net462/protobuf-net.xml",
+        "lib/net6.0/protobuf-net.dll",
+        "lib/net6.0/protobuf-net.xml",
         "lib/netstandard2.0/protobuf-net.dll",
         "lib/netstandard2.0/protobuf-net.xml",
         "lib/netstandard2.1/protobuf-net.dll",
         "lib/netstandard2.1/protobuf-net.xml",
-        "protobuf-net.3.0.101.nupkg.sha512",
+        "protobuf-net.3.2.16.nupkg.sha512",
         "protobuf-net.nuspec",
         "protobuf-net.png"
       ]
     },
-    "protobuf-net.Core/3.0.101": {
-      "sha512": "gf9QIF0RlctfjmOjbE6eOyMulkNEsH7tHncjKj/4BTu9tkuTyrH3fv5I+35GnolJqKJ6fh9kYaezvNRL3t75+Q==",
+    "protobuf-net.Core/3.2.16": {
+      "sha512": "ZFoY0lfMUWGJ4RoyI0oNj2o2l8t08n3k27YyDD0kYWQ+vXj0hTbWEwYWOpGAfCWvyUPkq9Jcc/4uR74GICZL2g==",
       "type": "package",
-      "path": "protobuf-net.core/3.0.101",
+      "path": "protobuf-net.core/3.2.16",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "lib/net461/protobuf-net.Core.dll",
-        "lib/net461/protobuf-net.Core.xml",
-        "lib/net5.0/protobuf-net.Core.dll",
-        "lib/net5.0/protobuf-net.Core.xml",
-        "lib/netcoreapp3.1/protobuf-net.Core.dll",
-        "lib/netcoreapp3.1/protobuf-net.Core.xml",
+        "lib/net462/protobuf-net.Core.dll",
+        "lib/net462/protobuf-net.Core.xml",
+        "lib/net6.0/protobuf-net.Core.dll",
+        "lib/net6.0/protobuf-net.Core.xml",
         "lib/netstandard2.0/protobuf-net.Core.dll",
         "lib/netstandard2.0/protobuf-net.Core.xml",
         "lib/netstandard2.1/protobuf-net.Core.dll",
         "lib/netstandard2.1/protobuf-net.Core.xml",
-        "protobuf-net.core.3.0.101.nupkg.sha512",
+        "protobuf-net.core.3.2.16.nupkg.sha512",
         "protobuf-net.core.nuspec",
         "protobuf-net.png"
       ]
@@ -4781,10 +4796,10 @@
         "steamauth.nuspec"
       ]
     },
-    "SteamKit2/2.4.1": {
-      "sha512": "t9yptysn/2YY6KZaI123vOOnumS+ZCFcC6MhFEkTiQ04mdpZ/EWhk5RVY7jU36IQHyTQUXotmn7taKFCXMKp4g==",
+    "SteamKit2/2.5.0-Beta.1": {
+      "sha512": "fwwdF0cZZEIdNpcUc1+B9zbP5Q48A3DFOAclPhBh2dMTU03aROaIDktFW+Ww/NN1Z/Emp/LwVqHB+hCM8uxS4Q==",
       "type": "package",
-      "path": "steamkit2/2.4.1",
+      "path": "steamkit2/2.5.0-beta.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4797,9 +4812,37 @@
         "lib/netstandard2.0/SteamKit2.xml",
         "license.txt",
         "readme.txt",
-        "steamkit2.2.4.1.nupkg.sha512",
+        "steamkit2.2.5.0-beta.1.nupkg.sha512",
         "steamkit2.nuspec",
         "steamkit_logo_128.png"
+      ]
+    },
+    "System.Collections.Immutable/7.0.0": {
+      "sha512": "dQPcs0U1IKnBdRDBkrCTi1FoajSTBzLcVTpjO4MBCMC7f4pDOIPzgBoX8JjG7X6uZRJ8EBxsi8+DR1JuwjnzOQ==",
+      "type": "package",
+      "path": "system.collections.immutable/7.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.Collections.Immutable.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Collections.Immutable.targets",
+        "lib/net462/System.Collections.Immutable.dll",
+        "lib/net462/System.Collections.Immutable.xml",
+        "lib/net6.0/System.Collections.Immutable.dll",
+        "lib/net6.0/System.Collections.Immutable.xml",
+        "lib/net7.0/System.Collections.Immutable.dll",
+        "lib/net7.0/System.Collections.Immutable.xml",
+        "lib/netstandard2.0/System.Collections.Immutable.dll",
+        "lib/netstandard2.0/System.Collections.Immutable.xml",
+        "system.collections.immutable.7.0.0.nupkg.sha512",
+        "system.collections.immutable.nuspec",
+        "useSharedDesignerContext.txt"
       ]
     },
     "System.Configuration.ConfigurationManager/6.0.1": {
@@ -5652,29 +5695,24 @@
       "MahApps.Metro.IconPacks.Modern >= 4.11.0",
       "Newtonsoft.Json >= 13.0.2",
       "SteamAuth >= 3.0.0",
-      "SteamKit2 >= 2.4.1",
+      "SteamKit2 >= 2.5.0-Beta.1",
       "zxcvbn-core >= 8.0.0-beta0002"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\aleck\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\aleck\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\CSWPF.csproj",
+      "projectUniqueName": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
       "projectName": "CSWPF",
-      "projectPath": "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\CSWPF.csproj",
+      "projectPath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
       "packagesPath": "C:\\Users\\aleck\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\obj\\",
+      "outputPath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
         "C:\\Users\\aleck\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -5750,7 +5788,7 @@
           },
           "SteamKit2": {
             "target": "Package",
-            "version": "[2.4.1, )"
+            "version": "[2.5.0-Beta.1, )"
           },
           "zxcvbn-core": {
             "target": "Package",
@@ -5776,7 +5814,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.306\\RuntimeIdentifierGraph.json"
       }
     }
   },

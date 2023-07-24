@@ -85,7 +85,9 @@ public sealed class WebHandler : IDisposable {
 		return string.IsNullOrEmpty(VanityURL) ? $"/profiles/{Bot.SteamID}" : $"/id/{VanityURL}";
 	}
 
-	public async  Task<List<InventoryResponseCS.Asset>> GetInventoryAsync(ulong steamID = 0, uint appID = AssetCS.SteamAppID, ulong contextID = AssetCS.SteamCommunityContextID)
+	public const uint SteamAppID = 730;
+	public const ulong SteamCommunityContextID = 2;
+	public async  Task<List<InventoryResponseCS.Asset>> GetInventoryAsync(ulong steamID = 0, uint appID = SteamAppID, ulong contextID = SteamCommunityContextID)
 	{
 		ulong startAssetID = 0;
 		
@@ -262,7 +264,7 @@ public sealed class WebHandler : IDisposable {
 		return await UrlPostWithSession(request, data: data, session: ESession.CamelCase).ConfigureAwait(false);
 	}
 
-	public async Task<(bool Success, HashSet<ulong>? TradeOfferIDs, HashSet<ulong>? MobileTradeOfferIDs)> SendTradeOffer(ulong steamID, IReadOnlyCollection<AssetCS>? itemsToGive = null, IReadOnlyCollection<AssetCS>? itemsToReceive = null, string? token = null, bool forcedSingleOffer = false, ushort itemsPerTrade = 255) {
+	public async Task<(bool Success, HashSet<ulong>? TradeOfferIDs, HashSet<ulong>? MobileTradeOfferIDs)> SendTradeOffer(ulong steamID, IReadOnlyCollection<InventoryResponseCS.AssetCS>? itemsToGive = null, IReadOnlyCollection<InventoryResponseCS.AssetCS>? itemsToReceive = null, string? token = null, bool forcedSingleOffer = false, ushort itemsPerTrade = 255) {
 		if ((steamID == 0) || !new SteamID(steamID).IsIndividualAccount) {
 			throw new ArgumentOutOfRangeException(nameof(steamID));
 		}
@@ -279,7 +281,7 @@ public sealed class WebHandler : IDisposable {
 		HashSet<TradeOfferSendRequest> trades = new() { singleTrade };
 
 		if (itemsToGive != null) {
-			foreach (AssetCS itemToGive in itemsToGive) {
+			foreach (InventoryResponseCS.AssetCS itemToGive in itemsToGive) {
 				if (!forcedSingleOffer && (singleTrade.ItemsToGive.Assets.Count + singleTrade.ItemsToReceive.Assets.Count >= itemsPerTrade)) {
 					if (trades.Count >= 255) {
 						break;
@@ -294,7 +296,7 @@ public sealed class WebHandler : IDisposable {
 		}
 
 		if (itemsToReceive != null) {
-			foreach (AssetCS itemToReceive in itemsToReceive) {
+			foreach (InventoryResponseCS.AssetCS itemToReceive in itemsToReceive) {
 				if (!forcedSingleOffer && (singleTrade.ItemsToGive.Assets.Count + singleTrade.ItemsToReceive.Assets.Count >= itemsPerTrade)) {
 					if (trades.Count >= 255) {
 						break;

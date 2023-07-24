@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\CSWPF.csproj": {}
+    "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj": {}
   },
   "projects": {
-    "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\CSWPF.csproj": {
+    "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\CSWPF.csproj",
+        "projectUniqueName": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
         "projectName": "CSWPF",
-        "projectPath": "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\CSWPF.csproj",
+        "projectPath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
         "packagesPath": "C:\\Users\\aleck\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\aleck\\RiderProjects\\CSWPF\\CSWPF\\obj\\",
+        "outputPath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
           "C:\\Users\\aleck\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -94,7 +90,7 @@
             },
             "SteamKit2": {
               "target": "Package",
-              "version": "[2.4.1, )"
+              "version": "[2.5.0-Beta.1, )"
             },
             "zxcvbn-core": {
               "target": "Package",
@@ -120,7 +116,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.306\\RuntimeIdentifierGraph.json"
         }
       }
     }

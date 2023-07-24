@@ -20,7 +20,7 @@
           "MahApps.Metro.IconPacks.Modern": "4.11.0",
           "Newtonsoft.Json": "13.0.2",
           "SteamAuth": "3.0.0",
-          "SteamKit2": "2.4.1",
+          "SteamKit2": "2.5.0-Beta.1",
           "zxcvbn-core": "8.0.0-beta0002"
         },
         "runtime": {
@@ -1120,22 +1120,25 @@
           }
         }
       },
-      "protobuf-net/3.0.101": {
+      "protobuf-net/3.2.16": {
         "dependencies": {
-          "protobuf-net.Core": "3.0.101"
+          "protobuf-net.Core": "3.2.16"
         },
         "runtime": {
-          "lib/net5.0/protobuf-net.dll": {
+          "lib/net6.0/protobuf-net.dll": {
             "assemblyVersion": "3.0.0.0",
-            "fileVersion": "3.0.101.59408"
+            "fileVersion": "3.2.16.54102"
           }
         }
       },
-      "protobuf-net.Core/3.0.101": {
+      "protobuf-net.Core/3.2.16": {
+        "dependencies": {
+          "System.Collections.Immutable": "7.0.0"
+        },
         "runtime": {
-          "lib/net5.0/protobuf-net.Core.dll": {
+          "lib/net6.0/protobuf-net.Core.dll": {
             "assemblyVersion": "3.0.0.0",
-            "fileVersion": "3.0.101.59408"
+            "fileVersion": "3.2.16.54102"
           }
         }
       },
@@ -1303,18 +1306,19 @@
           }
         }
       },
-      "SteamKit2/2.4.1": {
+      "SteamKit2/2.5.0-Beta.1": {
         "dependencies": {
           "Microsoft.Win32.Registry": "5.0.0",
-          "protobuf-net": "3.0.101"
+          "protobuf-net": "3.2.16"
         },
         "runtime": {
           "lib/net6.0/SteamKit2.dll": {
-            "assemblyVersion": "2.4.1.0",
-            "fileVersion": "2.4.1.10"
+            "assemblyVersion": "2.5.0.0",
+            "fileVersion": "2.5.0.0"
           }
         }
       },
+      "System.Collections.Immutable/7.0.0": {},
       "System.Configuration.ConfigurationManager/6.0.1": {
         "dependencies": {
           "System.Security.Cryptography.ProtectedData": "6.0.0",
@@ -2043,19 +2047,19 @@
       "path": "npgsql/7.0.2",
       "hashPath": "npgsql.7.0.2.nupkg.sha512"
     },
-    "protobuf-net/3.0.101": {
+    "protobuf-net/3.2.16": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-mLm8VGfGylp9q+rbJDp3uw0BOeNzfGENecVz/EYGlzq3ss7tfajGXHCMoZm/GxJ9vSn9pcK22UXWZnQ5GJQMjA==",
-      "path": "protobuf-net/3.0.101",
-      "hashPath": "protobuf-net.3.0.101.nupkg.sha512"
+      "sha512": "sha512-W6RM2B2f5O7SigBGfkXFYzI/a7Mks+rCHtuGlE/b5O3NMupDon7I0akjCLhrfcnqIfdWDkDafseav/MnIzUSHA==",
+      "path": "protobuf-net/3.2.16",
+      "hashPath": "protobuf-net.3.2.16.nupkg.sha512"
     },
-    "protobuf-net.Core/3.0.101": {
+    "protobuf-net.Core/3.2.16": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-gf9QIF0RlctfjmOjbE6eOyMulkNEsH7tHncjKj/4BTu9tkuTyrH3fv5I+35GnolJqKJ6fh9kYaezvNRL3t75+Q==",
-      "path": "protobuf-net.core/3.0.101",
-      "hashPath": "protobuf-net.core.3.0.101.nupkg.sha512"
+      "sha512": "sha512-ZFoY0lfMUWGJ4RoyI0oNj2o2l8t08n3k27YyDD0kYWQ+vXj0hTbWEwYWOpGAfCWvyUPkq9Jcc/4uR74GICZL2g==",
+      "path": "protobuf-net.core/3.2.16",
+      "hashPath": "protobuf-net.core.3.2.16.nupkg.sha512"
     },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.4": {
       "type": "package",
@@ -2092,12 +2096,19 @@
       "path": "steamauth/3.0.0",
       "hashPath": "steamauth.3.0.0.nupkg.sha512"
     },
-    "SteamKit2/2.4.1": {
+    "SteamKit2/2.5.0-Beta.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-t9yptysn/2YY6KZaI123vOOnumS+ZCFcC6MhFEkTiQ04mdpZ/EWhk5RVY7jU36IQHyTQUXotmn7taKFCXMKp4g==",
-      "path": "steamkit2/2.4.1",
-      "hashPath": "steamkit2.2.4.1.nupkg.sha512"
+      "sha512": "sha512-fwwdF0cZZEIdNpcUc1+B9zbP5Q48A3DFOAclPhBh2dMTU03aROaIDktFW+Ww/NN1Z/Emp/LwVqHB+hCM8uxS4Q==",
+      "path": "steamkit2/2.5.0-beta.1",
+      "hashPath": "steamkit2.2.5.0-beta.1.nupkg.sha512"
+    },
+    "System.Collections.Immutable/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dQPcs0U1IKnBdRDBkrCTi1FoajSTBzLcVTpjO4MBCMC7f4pDOIPzgBoX8JjG7X6uZRJ8EBxsi8+DR1JuwjnzOQ==",
+      "path": "system.collections.immutable/7.0.0",
+      "hashPath": "system.collections.immutable.7.0.0.nupkg.sha512"
     },
     "System.Configuration.ConfigurationManager/6.0.1": {
       "type": "package",

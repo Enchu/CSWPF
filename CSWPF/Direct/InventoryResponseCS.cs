@@ -103,6 +103,33 @@ public class InventoryResponseCS: OptionalResultResponse {
         public string MarketBuyCountryRestriction { get; set; }
     }
     
+    public class AssetCS
+    {
+        [JsonProperty("appid")]
+        public uint AppID { get; set; }
+        [JsonProperty("contextid")]
+        public string ContextID { get; set; }
+        [JsonProperty("amount")]
+        public uint Amount { get; set; }
+        [JsonProperty("assetid")]
+        public string AssetID { get; set; }
+        [JsonProperty("classid")]
+        public ulong ClassID { get; set; }
+        [JsonProperty("instanceid")]
+        public ulong InstanceID { get; set; }
+        [JsonIgnore]
+        public bool Tradable { get; set; }
+        [JsonIgnore]
+        public string MarketName = null;
+        [JsonIgnore]
+        public bool Marketable;
+        [JsonConstructor]
+        public AssetCS()
+        {
+
+        }
+    }
+    
     public enum TypeEnum { Html };
     public partial class DescriptionDescription
     {
@@ -132,5 +159,11 @@ public class InventoryResponseCS: OptionalResultResponse {
 
         [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
         public string Color { get; set; }
+    }
+    
+    [JsonConstructor]
+    public InventoryResponseCS()
+    {
+        
     }
 }

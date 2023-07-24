@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSWPF", "CSWPF\CSWPF.csproj", "{499B3795-4BC1-4A11-9800-A771F124BA5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "Launcher\Launcher.csproj", "{EA913837-F13F-44AB-8724-9DD03B3C266D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{499B3795-4BC1-4A11-9800-A771F124BA5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{499B3795-4BC1-4A11-9800-A771F124BA5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{499B3795-4BC1-4A11-9800-A771F124BA5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA913837-F13F-44AB-8724-9DD03B3C266D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA913837-F13F-44AB-8724-9DD03B3C266D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA913837-F13F-44AB-8724-9DD03B3C266D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA913837-F13F-44AB-8724-9DD03B3C266D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

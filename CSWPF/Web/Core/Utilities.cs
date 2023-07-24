@@ -90,7 +90,14 @@ public static class Utilities {
 
 	public static bool IsSuccessCode(this HttpStatusCode statusCode) => statusCode is >= HttpStatusCode.OK and < HttpStatusCode.Ambiguous;
 	
+	public static bool IsValidCdKey(string key) {
+		if (string.IsNullOrEmpty(key)) {
+			throw new ArgumentNullException(nameof(key));
+		}
 
+		return GeneratedRegexes.CdKey().IsMatch(key);
+	}
+	
 	public static bool IsValidHexadecimalText(string text) {
 		if (string.IsNullOrEmpty(text)) {
 			throw new ArgumentNullException(nameof(text));

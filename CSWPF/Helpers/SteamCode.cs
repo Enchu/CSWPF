@@ -22,11 +22,10 @@ public static class SteamCode
 
     [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
-    
     public static async Task SteamCodeEnter(User user)
     {
         await Task.Delay(15000);
-        IEnumerable<Process> SteamProcesses = Process.GetProcesses().Where(pr => pr.ProcessName.ToLower().Contains($"steam_{user.SteamID}"));
+        IEnumerable<Process> SteamProcesses = Process.GetProcesses().Where(pr => pr.ProcessName.ToLower().Contains($"steam_{user.SteamId}"));
         string code = await TwoFactory.GenerateSteamGuardCode(TwoFactory.GetSteamTime(), user.SharedSecret);
         await Task.Delay(defaulttime);
         

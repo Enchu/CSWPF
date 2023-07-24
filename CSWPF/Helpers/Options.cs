@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+#pragma warning disable SYSLIB0011
 
 namespace CSWPF.Helpers;
 
@@ -62,14 +63,12 @@ public class Options
       return Options.optionsFileName;
     }
 
-    [Obsolete("Obsolete")]
     public void Save()
     {
       using (FileStream serializationStream = new FileStream(Options.GetOptionsFileName(), FileMode.Create, FileAccess.Write))
         new BinaryFormatter().Serialize((Stream) serializationStream, (object) this);
     }
-
-    [Obsolete("Obsolete")]
+    
     public static Options Load()
     {
       if (!File.Exists(Options.GetOptionsFileName()))

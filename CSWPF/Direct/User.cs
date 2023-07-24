@@ -2,20 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Serialization;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CSWPF.Helpers;
 using CSWPF.Utils;
-using CSWPF.Web;
 using System.Linq;
 using CSWPF.Steam;
-using CSWPF.Steam.Data;
-using CSWPF.Steam.Security;
 using Newtonsoft.Json;
+using Confirmation = CSWPF.Steam.Security.Confirmation;
 
 namespace CSWPF.Directory;
 
@@ -28,7 +24,9 @@ public class User
     [DataMember(Name = "Password")]
     public string Password { get; set; }
     [JsonProperty("SteamID")] 
-    public ulong SteamID { get; set; }
+    public ulong SteamId { get; set; }
+    [DataMember(Name = "Sid")]
+    public ulong SID { get; set; }
     [JsonProperty("shared_secret")]
     public string SharedSecret { get; set; }
     [JsonProperty("prime")]
@@ -45,14 +43,48 @@ public class User
     {
         Clipboard.SetText(Password);
     }
-    
+
     public void ClickStart(object sender, RoutedEventArgs e)
     {
+        StartCS();
+    }
+
+    public void StartCsLauncher()
+    {
+        ulong result = SteamId;
+        result -= 76561197960265728L;
         //Settings
-         Settings.ExchangeCfg(SteamID);
+        Settings.ExchangeCfg(result);
+        Settings.FixAutoexec(result);
         //Start
-        if(!File.Exists($"{Settings.SteamPath}steam_{SteamID}.exe"))
-            File.Copy($"{Settings.SteamFullPath}",$"{Settings.SteamPath}steam_{SteamID}.exe");
+        string str1 = System.IO.Directory.GetCurrentDirectory() + "/Launcher/Launcher.exe";
+        string str2 = Options.G.IsHideLauncher ? "1" : "0";
+        string str3 = " \"" + Login + "\"" + (" \"" + Login + "\"") + (" \"" + Password + "\"") + (" \"" + Settings.ConfigGame + "\"") + (" " + SteamId) + (" \"" + "princeenchu" + "\"") + (" \"" + "princetankist5" + "\"") + string.Format(" {0}", (object) Settings.X) + string.Format(" {0}", (object) Settings.Y) + " 640" + " 480" + (" " + str2) + (" \"" + Settings.SteamPath + "\"");
+        new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = str1,
+                Arguments = str3,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            }
+        }.Start();
+        //SteamCode
+        SteamCode.SteamCodeEnter(this);
+        //_account.Lobby.StartWorkers();
+    }
+
+    public void StartCS()
+    {
+        ulong result = SteamId;
+        result -= 76561197960265728L;
+        //Settings
+        Settings.ExchangeCfg(result);
+        Settings.FixAutoexec(result);
+        //Start
+        if(!File.Exists($"{Settings.SteamPath}steam_{SteamId}.exe"))
+            File.Copy($"{Settings.SteamFullPath}",$"{Settings.SteamPath}steam_{SteamId}.exe");
         new Thread(() =>
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()
@@ -61,7 +93,7 @@ public class User
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 WorkingDirectory = $"{Settings.SteamPath}",
-                FileName = $"{Settings.SteamPath}steam_{SteamID}.exe",
+                FileName = $"{Settings.SteamPath}steam_{SteamId}.exe",
                 Arguments = $" -login {Login} {Password} {Settings.ConfigBot} {Settings.ConfigGame} {Settings.StartSteam}",
             }; //-noverifyfiles -nofriendsui //-forceservice ?? Run Steam Client Service even if Steam has admin rights.
             Process process1 = new Process()
@@ -76,22 +108,21 @@ public class User
 
     public void ClickOpenSteam(object sender, RoutedEventArgs e)
     {
-        TimerKill.OpenSteam($"{Settings.SteamPath}steam_{SteamID}.exe");
+        TimerKill.OpenSteam($"{Settings.SteamPath}steam_{SteamId}.exe");
     }
 
     public void ClickKill(object sender, RoutedEventArgs e)
     {
-        TimerKill.KillSteam(SteamID);
+        TimerKill.KillSteam(SteamId);
     }
     
     //https://steamcommunity.com/inventory/76561199198508752/730/2?l=english&count=5000
     //https://steamcommunity.com/inventory/76561199198508752/730/2/?l=english
-
     public void ClickCheckInventory(object sender, RoutedEventArgs e)
-    { 
+    {
         CheckInventory();
     }
-
+    
     public async Task CheckInventory()
     {
         IReadOnlyCollection<InventoryResponseCS.Asset> inventory;
@@ -99,8 +130,8 @@ public class User
         Bot newBot = new Bot(users);
         await newBot.Start();
         await Task.Delay(30000);
-        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
-        IReadOnlyCollection<AssetCS> items = inventory.Select(asset => new AssetCS
+        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamId);
+        IReadOnlyCollection<InventoryResponseCS.AssetCS> items = inventory.Select(asset => new InventoryResponseCS.AssetCS
         {
             AppID = asset.Appid,
             ContextID = asset.Contextid,
@@ -108,8 +139,10 @@ public class User
             AssetID = asset.Assetid
         }).ToList();
         
-        (bool success, _, HashSet<ulong>? mobileTradeOfferIDs) = await newBot.WebHandler.SendTradeOffer(76561198084558331, items, null, "_TOKyI1G").ConfigureAwait(false);
-        
+        (bool success, _, HashSet<ulong>? mobileTradeOfferIDs) = await newBot.WebHandler.SendTradeOffer(76561198084558331, items, null, Settings.TokenID).ConfigureAwait(false);
+
+        MessageBox.Show("Трейд отправлен");
+        //Mobile
         if ((mobileTradeOfferIDs?.Count > 0) && newBot.HasMobileAuthenticator) {
             (bool twoFactorSuccess, _, _) = await newBot.Actions.HandleTwoFactorAuthenticationConfirmations(true, Confirmation.EType.Trade, mobileTradeOfferIDs, true).ConfigureAwait(false);
 
@@ -118,7 +151,7 @@ public class User
             }
         }
     }
-    
+
     public void CheckPrime(object sender, RoutedEventArgs e)
     {
         var users = JsonConvert.DeserializeObject<User>(File.ReadAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json"));

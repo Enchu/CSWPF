@@ -1,20 +1,43 @@
 ﻿using System;
+using System.Threading.Tasks;
+using SteamAuth;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using System.Linq;
 using CSWPF.Directory;
 using CSWPF.Steam;
-using CSWPF.Web.Responses;
-using CSWPF.Web;
-using JetBrains.Annotations;
+using CSWPF.Utils;
 using Newtonsoft.Json;
+using Confirmation = CSWPF.Steam.Security.Confirmation;
 
 namespace CSWPF.Helpers;
 
-public class HelperCS
+public partial class HelperCS : System.Windows.Forms.Form
 {
+    public User user;
+    private SteamGuardAccount _steamAccount;
+    
+    public HelperCS(User user, SteamGuardAccount steamAccount)
+    {
+        this.user = user;
+        this._steamAccount = steamAccount;
+    }
+
+    public static void SaveNew(User user, string steamid, string sharedSecret)
+    {
+        User allUsers = new User(user.Login, user.Password);
+        allUsers.SteamId = Convert.ToUInt64(steamid);
+        allUsers.SID = allUsers.SteamId - 76561197960265728L;
+        allUsers.SharedSecret = sharedSecret;
+        allUsers.Prime = false;
+        if(allUsers.SteamId == 0)
+        {
+            return;
+        }
+
+        File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + allUsers.Login + ".json", JsonConvert.SerializeObject(allUsers));
+    }
+
     public static void SaveToDB(User user)
     {
         User allUsers = new User(user.Login, user.Password);
@@ -23,26 +46,21 @@ public class HelperCS
             var currentUsers = JsonConvert.DeserializeObject<maFile>(File.ReadAllText(filename));
             if (currentUsers.AccountName == user.Login)
             {
-                allUsers.SteamID = currentUsers.Session.SteamId;
+                allUsers.SteamId = currentUsers.Session.SteamId;
                 allUsers.SharedSecret = currentUsers.SharedSecret;
                 allUsers.Prime = false;
             }
         }
-        if(allUsers.SteamID == 0)
+        if(allUsers.SteamId == 0)
         {
             return;
         }
 
         File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + allUsers.Login + ".json", JsonConvert.SerializeObject(allUsers));
     }
+
     
-    public static List<User> ReadAllFromDB(string filePath)
-    {
-        string json = File.ReadAllText(System.IO.Directory.GetCurrentDirectory() + filePath);
-        List<User> currentUsers = JsonConvert.DeserializeObject<List<User>>(json);
-        return currentUsers ?? new List<User>();
-    }
-    
+
     public async Task TradeInventory(User user)
     {
         List<InventoryResponseCS.Asset> inventory;
@@ -50,7 +68,7 @@ public class HelperCS
         Bot newBot = new Bot(users);
         await newBot.Start();
         await Task.Delay(30000);
-        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
+        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamId);
         if (inventory.Count > 0)
         {
             //WebHandler.SendTradeOffer(inventory.);

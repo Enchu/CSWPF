@@ -29,7 +29,7 @@
       <PackageReference Include="MahApps.Metro.IconPacks.Modern" Version="4.11.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
       <PackageReference Include="SteamAuth" Version="3.0.0" />
-      <PackageReference Include="SteamKit2" Version="2.4.1" />
+      <PackageReference Include="SteamKit2" Version="2.5.0-Beta.1" />
       <PackageReference Include="zxcvbn-core" Version="8.0.0-beta0002" />
     </ItemGroup>
 
@@ -49,10 +49,17 @@
       <None Remove="Icons\mem.ico" />
       <Resource Include="Icons\mem.ico" />
       <None Remove="Icons\home.png" />
+      <None Remove="Icons\wifi.ico" />
+      <Resource Include="Icons\wifi.ico" />
+      <None Remove="Icons\irrigation.png" />
     </ItemGroup>
 
     <ItemGroup>
       <Resource Include="Icons\home.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="Icons\irrigation.png" />
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -15,6 +17,7 @@ using CSWPF.Helpers;
 using CSWPF.Steam.Integration;
 using CSWPF.Steam.Interaction;
 using CSWPF.Steam.Plugns;
+using CSWPF.Steam.Security;
 using CSWPF.Steam.Storage;
 using CSWPF.Utils;
 using CSWPF.Web;
@@ -29,6 +32,7 @@ using Utilities = CSWPF.Web.Core.Utilities;
 namespace CSWPF.Steam;
 
 public sealed class Bot : IAsyncDisposable, IDisposable {
+	private const char DefaultBackgroundKeysRedeemerSeparator = '\t';
 	internal const ushort CallbackSleep = 500; // In milliseconds
 	private readonly static SemaphoreSlim LoginSemaphore = new(1, 1);
 	private readonly static SemaphoreSlim LoginRateLimitingSemaphore = new(1, 1);
@@ -283,7 +287,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 
 		return false;
 	}
-
+	
 	internal async Task Start() {
 		if (KeepRunning)
 		{
@@ -292,6 +296,35 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 
 		KeepRunning = true;
 		Utilities.InBackground(HandleCallbacks, true);
+
+		if (!HasMobileAuthenticator)
+		{
+			string mobileAuthenticatorFilePath = $@"D:\Game\SDA\maFiles\{user.SteamId}.maFile";
+
+			if (string.IsNullOrEmpty(mobileAuthenticatorFilePath))
+			{
+				Msg.ShowError(mobileAuthenticatorFilePath);
+
+				return;
+			}
+
+			if (File.Exists(mobileAuthenticatorFilePath))
+			{
+				await ImportAuthenticatorFromFile(mobileAuthenticatorFilePath).ConfigureAwait(false);
+			}
+		}
+		
+		string keysToRedeemFilePath = GetFilePath(EFileType.KeysToRedeem);
+
+		if (string.IsNullOrEmpty(keysToRedeemFilePath)) {
+			Msg.ShowError(keysToRedeemFilePath);
+
+			return;
+		}
+
+		if (File.Exists(keysToRedeemFilePath)) {
+			await ImportKeysToRedeem(keysToRedeemFilePath).ConfigureAwait(false);
+		}
 
 		await Connect().ConfigureAwait(false);
 	}
@@ -302,10 +335,87 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 		}
 
 		KeepRunning = false;
+		Msg.ShowInfo("Bot Stopping");
 
 		if (SteamClient.IsConnected) {
 			Disconnect();
 		}
+	}
+	
+	internal async Task ImportKeysToRedeem(string filePath) {
+		if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) {
+			throw new ArgumentNullException(nameof(filePath));
+		}
+
+		try {
+			OrderedDictionary gamesToRedeemInBackground = new();
+
+			using (StreamReader reader = new(filePath)) {
+				while (await reader.ReadLineAsync().ConfigureAwait(false) is { } line) {
+					if (line.Length == 0) {
+						continue;
+					}
+
+					// Valid formats:
+					// Key (name will be the same as key and replaced from redemption result, if possible)
+					// Name + Key (user provides both, if name is equal to key, above logic is used, otherwise name is kept)
+					// Name + <Ignored> + Key (BGR output format, we include extra properties in the middle, those are ignored during import)
+					string[] parsedArgs = line.Split(DefaultBackgroundKeysRedeemerSeparator, StringSplitOptions.RemoveEmptyEntries);
+
+					if (parsedArgs.Length < 1) {
+						continue;
+					}
+
+					string name = parsedArgs[0];
+					string key = parsedArgs[^1];
+
+					gamesToRedeemInBackground[key] = name;
+				}
+			}
+
+			File.Delete(filePath);
+		} catch (Exception e) {
+			Msg.ShowError(e.ToString());
+		}
+	}
+	
+	internal static IOrderedDictionary ValidateGamesToRedeemInBackground(IOrderedDictionary gamesToRedeemInBackground) {
+		if ((gamesToRedeemInBackground == null) || (gamesToRedeemInBackground.Count == 0)) {
+			throw new ArgumentNullException(nameof(gamesToRedeemInBackground));
+		}
+
+		HashSet<object> invalidKeys = new();
+
+		foreach (DictionaryEntry game in gamesToRedeemInBackground) {
+			bool invalid = false;
+
+			string? key = game.Key as string;
+
+			// ReSharper disable once RedundantSuppressNullableWarningExpression - required for .NET Framework
+			if (string.IsNullOrEmpty(key)) {
+				invalid = true;
+			} else if (!Utilities.IsValidCdKey(key!)) {
+				invalid = true;
+			}
+
+			string? name = game.Value as string;
+
+			if (string.IsNullOrEmpty(name)) {
+				invalid = true;
+			}
+
+			if (invalid && (key != null)) {
+				invalidKeys.Add(key);
+			}
+		}
+
+		if (invalidKeys.Count > 0) {
+			foreach (string invalidKey in invalidKeys) {
+				gamesToRedeemInBackground.Remove(invalidKey);
+			}
+		}
+
+		return gamesToRedeemInBackground;
 	}
 
 	private static async Task LimitLoginRequestsAsync()
@@ -358,6 +468,49 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 		}
 
 		SteamClient.Connect();
+	}
+	
+	private async Task ImportAuthenticatorFromFile(string maFilePath) {
+		if (HasMobileAuthenticator || !File.Exists(maFilePath)) {
+			return;
+		}
+		
+		try {
+			string json = await File.ReadAllTextAsync(maFilePath).ConfigureAwait(false);
+
+			if (string.IsNullOrEmpty(json)) {
+				return;
+			}
+
+			MobileAuthenticator? authenticator = JsonConvert.DeserializeObject<MobileAuthenticator>(json);
+
+			if (authenticator == null) {
+				Msg.ShowError(" " + authenticator);
+
+				return;
+			}
+
+			if (!TryImportAuthenticator(authenticator)) {
+				return;
+			}
+
+			File.Delete(maFilePath);
+		} catch (Exception e) {
+			Msg.ShowError(e.ToString());
+		}
+	}
+	
+	internal bool TryImportAuthenticator(MobileAuthenticator authenticator) {
+		ArgumentNullException.ThrowIfNull(authenticator);
+
+		if (HasMobileAuthenticator) {
+			return false;
+		}
+
+		authenticator.Init(this);
+		BotDatabase.MobileAuthenticator = authenticator;
+		
+		return true;
 	}
 
 	private async Task Destroy(bool force = false) {
@@ -521,7 +674,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
                    
 				WebHandler.OnVanityURLChanged(callback.VanityURL);
 
-				if (!await WebHandler.Init(user.SteamID, SteamClient.Universe, callback.WebAPIUserNonce ?? throw new InvalidOperationException(nameof(callback.WebAPIUserNonce))).ConfigureAwait(false))
+				if (!await WebHandler.Init(user.SteamId, SteamClient.Universe, callback.WebAPIUserNonce ?? throw new InvalidOperationException(nameof(callback.WebAPIUserNonce))).ConfigureAwait(false))
 				{
 					if (!await RefreshSession().ConfigureAwait(false))
 					{

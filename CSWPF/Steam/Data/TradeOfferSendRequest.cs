@@ -13,6 +13,6 @@ internal sealed class TradeOfferSendRequest {
 
     internal sealed class ItemList {
         [JsonProperty("assets", Required = Required.Always)]
-        internal readonly HashSet<AssetCS> Assets = new();
+        internal readonly HashSet<InventoryResponseCS.AssetCS> Assets = new();
     }
 }
