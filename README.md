@@ -6,7 +6,7 @@ Bots for any game
 - [X] WEB
   - [X] Open inventory
   - [X] Trade offer
-  - [ ] Invite
+  - [X] Invite
 - [ ] Create account
 
 # Структура папок и файлов
@@ -14,6 +14,5 @@ Bots for any game
   * `Direct/` - содержит классовые файлы
   * `Helper/` - содержит вспомогательные файлы
   * `Steam/` - содержит steam файлы
-  * `Utils/` - содержит вспомогательные файлы, отображения ошибок
   * `WEB/` - содержит файлы работы для WEB
   * `Windows/` - содержит файл, содержащий главное окно приложения
