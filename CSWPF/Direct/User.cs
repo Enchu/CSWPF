@@ -24,7 +24,7 @@ public class User
     [DataMember(Name = "Password")]
     public string Password { get; set; }
     [JsonProperty("SteamID")] 
-    public ulong SteamId { get; set; }
+    public ulong SteamID { get; set; }
     [DataMember(Name = "Sid")]
     public ulong SID { get; set; }
     [JsonProperty("shared_secret")]
@@ -51,7 +51,7 @@ public class User
 
     public void StartCsLauncher()
     {
-        ulong result = SteamId;
+        ulong result = SteamID;
         result -= 76561197960265728L;
         //Settings
         Settings.ExchangeCfg(result);
@@ -59,7 +59,7 @@ public class User
         //Start
         string str1 = System.IO.Directory.GetCurrentDirectory() + "/Launcher/Launcher.exe";
         string str2 = Options.G.IsHideLauncher ? "1" : "0";
-        string str3 = " \"" + Login + "\"" + (" \"" + Login + "\"") + (" \"" + Password + "\"") + (" \"" + Settings.ConfigGame + "\"") + (" " + SteamId) + (" \"" + "princeenchu" + "\"") + (" \"" + "princetankist5" + "\"") + string.Format(" {0}", (object) Settings.X) + string.Format(" {0}", (object) Settings.Y) + " 640" + " 480" + (" " + str2) + (" \"" + Settings.SteamPath + "\"");
+        string str3 = " \"" + Login + "\"" + (" \"" + Login + "\"") + (" \"" + Password + "\"") + (" \"" + Settings.ConfigGame + "\"") + (" " + SteamID) + (" \"" + "princeenchu" + "\"") + (" \"" + "princetankist5" + "\"") + string.Format(" {0}", (object) Settings.X) + string.Format(" {0}", (object) Settings.Y) + " 640" + " 480" + (" " + str2) + (" \"" + Settings.SteamPath + "\"");
         new Process()
         {
             StartInfo = new ProcessStartInfo()
@@ -72,19 +72,18 @@ public class User
         }.Start();
         //SteamCode
         SteamCode.SteamCodeEnter(this);
-        //_account.Lobby.StartWorkers();
     }
 
     public void StartCS()
     {
-        ulong result = SteamId;
+        ulong result = SteamID;
         result -= 76561197960265728L;
         //Settings
         Settings.ExchangeCfg(result);
         Settings.FixAutoexec(result);
         //Start
-        if(!File.Exists($"{Settings.SteamPath}steam_{SteamId}.exe"))
-            File.Copy($"{Settings.SteamFullPath}",$"{Settings.SteamPath}steam_{SteamId}.exe");
+        if(!File.Exists($"{Settings.SteamPath}steam_{SteamID}.exe"))
+            File.Copy($"{Settings.SteamFullPath}",$"{Settings.SteamPath}steam_{SteamID}.exe");
         new Thread(() =>
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()
@@ -93,7 +92,7 @@ public class User
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 WorkingDirectory = $"{Settings.SteamPath}",
-                FileName = $"{Settings.SteamPath}steam_{SteamId}.exe",
+                FileName = $"{Settings.SteamPath}steam_{SteamID}.exe",
                 Arguments = $" -login {Login} {Password} {Settings.ConfigBot} {Settings.ConfigGame} {Settings.StartSteam}",
             }; //-noverifyfiles -nofriendsui //-forceservice ?? Run Steam Client Service even if Steam has admin rights.
             Process process1 = new Process()
@@ -108,12 +107,12 @@ public class User
 
     public void ClickOpenSteam(object sender, RoutedEventArgs e)
     {
-        TimerKill.OpenSteam($"{Settings.SteamPath}steam_{SteamId}.exe");
+        TimerKill.OpenSteam($"{Settings.SteamPath}steam_{SteamID}.exe");
     }
 
     public void ClickKill(object sender, RoutedEventArgs e)
     {
-        TimerKill.KillSteam(SteamId);
+        TimerKill.KillSteam(SteamID);
     }
     
     //https://steamcommunity.com/inventory/76561199198508752/730/2?l=english&count=5000
@@ -130,7 +129,7 @@ public class User
         Bot newBot = new Bot(users);
         await newBot.Start();
         await Task.Delay(30000);
-        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamId);
+        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
         IReadOnlyCollection<InventoryResponseCS.AssetCS> items = inventory.Select(asset => new InventoryResponseCS.AssetCS
         {
             AppID = asset.Appid,
@@ -144,11 +143,13 @@ public class User
         MessageBox.Show("Трейд отправлен");
         //Mobile
         if ((mobileTradeOfferIDs?.Count > 0) && newBot.HasMobileAuthenticator) {
-            (bool twoFactorSuccess, _, _) = await newBot.Actions.HandleTwoFactorAuthenticationConfirmations(true, Confirmation.EType.Trade, mobileTradeOfferIDs, true).ConfigureAwait(false);
+            (bool twoFactorSuccess, _) = await newBot.Actions.HandleTwoFactorAuthenticationConfirmations(true, Confirmation.EConfirmationType.Trade, mobileTradeOfferIDs, true).ConfigureAwait(false);
 
             if (!twoFactorSuccess) {
                 Msg.ShowError(nameof(twoFactorSuccess));
             }
+
+            MessageBox.Show("Ура");
         }
     }
 
@@ -174,6 +175,13 @@ public class User
 
             File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json", JsonConvert.SerializeObject(this));
         }
+    }
+
+    public void CheckSID()
+    {
+        var users = JsonConvert.DeserializeObject<User>(File.ReadAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + Login + ".json"));
+        users.SID = users.SteamID - 76561197960265728L;
+        File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + users.Login + ".json", JsonConvert.SerializeObject(users));
     }
     
     public void ClickPrime(object sender, RoutedEventArgs e)

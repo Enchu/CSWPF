@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using CSWPF.Web.Assistance;
 using JetBrains.Annotations;
 
 namespace CSWPF.Web;
@@ -24,11 +25,10 @@ public sealed class Cacheable<T> : IDisposable {
 	}
 
 	public void Dispose() => InitSemaphore.Dispose();
-
-	[PublicAPI]
-	public async Task<(bool Success, T? Result)> GetValue(EFallback fallback = EFallback.DefaultForType) {
-		if (!Enum.IsDefined(fallback)) {
-			throw new InvalidEnumArgumentException(nameof(fallback), (int) fallback, typeof(EFallback));
+	
+	public async Task<(bool Success, T? Result)> GetValue(ECacheFallback cacheFallback = ECacheFallback.DefaultForType) {
+		if (!Enum.IsDefined(cacheFallback)) {
+			throw new InvalidEnumArgumentException(nameof(cacheFallback), (int) cacheFallback, typeof(ECacheFallback));
 		}
 
 		if (IsInitialized && IsRecent) {
@@ -45,11 +45,11 @@ public sealed class Cacheable<T> : IDisposable {
 			(bool success, T? result) = await ResolveFunction().ConfigureAwait(false);
 
 			if (!success) {
-				return fallback switch {
-					EFallback.DefaultForType => (false, default(T?)),
-					EFallback.FailedNow => (false, result),
-					EFallback.SuccessPreviously => (false, InitializedValue),
-					_ => throw new InvalidOperationException(nameof(fallback))
+				return cacheFallback switch {
+					ECacheFallback.DefaultForType => (false, default(T?)),
+					ECacheFallback.FailedNow => (false, result),
+					ECacheFallback.SuccessPreviously => (false, InitializedValue),
+					_ => throw new InvalidOperationException(nameof(cacheFallback))
 				};
 			}
 
@@ -61,6 +61,7 @@ public sealed class Cacheable<T> : IDisposable {
 			InitSemaphore.Release();
 		}
 	}
+	
 	public async Task Reset() {
 		if (!IsInitialized) {
 			return;

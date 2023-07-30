@@ -45,7 +45,7 @@ public sealed class WebHandler : IDisposable {
 	public static SemaphoreSlim OpenConnectionsSemaphore = new(1, 1);
 	public static SemaphoreSlim RateLimitingSemaphore = new(1, 1);
 	
-	internal static ICrossProcessSemaphore? InventorySemaphore { get; private set; }
+	//internal static ICrossProcessSemaphore? InventorySemaphore { get; private set; }
 
 	private bool Initialized;
 	private DateTime LastSessionCheck;
@@ -82,7 +82,7 @@ public sealed class WebHandler : IDisposable {
 			}
 		}
 
-		return string.IsNullOrEmpty(VanityURL) ? $"/profiles/{Bot.SteamID}" : $"/id/{VanityURL}";
+		return string.IsNullOrEmpty(VanityURL) ? $"/profiles/{Bot.user.SteamID}" : $"/id/{VanityURL}";
 	}
 
 	public const uint SteamAppID = 730;
@@ -128,12 +128,12 @@ public sealed class WebHandler : IDisposable {
 			}
 			finally {
 				if (rateLimitingDelay == 0) {
-					InventorySemaphore.Release();
+					//InventorySemaphore.Release();
 				} else {
 					Utilities.InBackground(
 						async () => {
 							await Task.Delay(rateLimitingDelay).ConfigureAwait(false);
-							InventorySemaphore.Release();
+							//InventorySemaphore.Release();
 						}
 					);
 				}
@@ -198,7 +198,7 @@ public sealed class WebHandler : IDisposable {
 			{ "access_token", accessToken! },
 
 			// ReSharper disable once HeapView.BoxingAllocation
-			{ "steamid", Bot.SteamID }
+			{ "steamid", Bot.user.SteamID }
 		};
 
 		KeyValue? response = null;
@@ -1235,7 +1235,7 @@ public sealed class WebHandler : IDisposable {
 			}
 		}
 
-		Uri request = new(SteamCommunityURL, $"/mobileconf/conf?a={Bot.SteamID}&k={Uri.EscapeDataString(confirmationHash)}&l=english&m=android&p={Uri.EscapeDataString(deviceID)}&t={time}&tag=conf");
+		Uri request = new(SteamCommunityURL, $"/mobileconf/conf?a={Bot.user.SteamID}&k={Uri.EscapeDataString(confirmationHash)}&l=english&m=android&p={Uri.EscapeDataString(deviceID)}&t={time}&tag=conf");
 
 		HtmlDocumentResponse? response = await UrlGetToHtmlDocumentWithSession(request, checkSessionPreemptively: false).ConfigureAwait(false);
 
@@ -1322,14 +1322,14 @@ public sealed class WebHandler : IDisposable {
 			}
 		}
 
-		Uri request = new(SteamCommunityURL, $"/mobileconf/ajaxop?a={Bot.SteamID}&cid={confirmationID}&ck={confirmationKey}&k={Uri.EscapeDataString(confirmationHash)}&l=english&m=android&op={(accept ? "allow" : "cancel")}&p={Uri.EscapeDataString(deviceID)}&t={time}&tag=conf");
+		Uri request = new(SteamCommunityURL, $"/mobileconf/ajaxop?a={Bot.user.SteamID}&cid={confirmationID}&ck={confirmationKey}&k={Uri.EscapeDataString(confirmationHash)}&l=english&m=android&op={(accept ? "allow" : "cancel")}&p={Uri.EscapeDataString(deviceID)}&t={time}&tag=conf");
 
 		ObjectResponse<BooleanResponse>? response = await UrlGetToJsonObjectWithSession<BooleanResponse>(request).ConfigureAwait(false);
 
 		return response?.Content?.Success;
 	}
 
-	internal async Task<bool?> HandleConfirmations(string deviceID, string confirmationHash, ulong time, IReadOnlyCollection<Steam.Security.Confirmation> confirmations, bool accept) {
+	internal async Task<bool?> HandleConfirmations(string deviceID, string confirmationHash, ulong time, IReadOnlyCollection<Confirmation> confirmations, bool accept) {
 		if (string.IsNullOrEmpty(deviceID)) {
 			throw new ArgumentNullException(nameof(deviceID));
 		}
@@ -1354,6 +1354,7 @@ public sealed class WebHandler : IDisposable {
 			}
 
 			if (!Initialized) {
+				
 				return null;
 			}
 		}
@@ -1362,9 +1363,9 @@ public sealed class WebHandler : IDisposable {
 
 		// Extra entry for sessionID
 		List<KeyValuePair<string, string>> data = new(8 + (confirmations.Count * 2)) {
-			new KeyValuePair<string, string>("a", Bot.SteamID.ToString(CultureInfo.InvariantCulture)),
+			new KeyValuePair<string, string>("a", Bot.user.SteamID.ToString(CultureInfo.InvariantCulture)),
 			new KeyValuePair<string, string>("k", confirmationHash),
-			new KeyValuePair<string, string>("m", "android"),
+			new KeyValuePair<string, string>("m", "react"),
 			new KeyValuePair<string, string>("op", accept ? "allow" : "cancel"),
 			new KeyValuePair<string, string>("p", deviceID),
 			new KeyValuePair<string, string>("t", time.ToString(CultureInfo.InvariantCulture)),
@@ -1373,7 +1374,7 @@ public sealed class WebHandler : IDisposable {
 
 		foreach (Confirmation confirmation in confirmations) {
 			data.Add(new KeyValuePair<string, string>("cid[]", confirmation.ID.ToString(CultureInfo.InvariantCulture)));
-			data.Add(new KeyValuePair<string, string>("ck[]", confirmation.Key.ToString(CultureInfo.InvariantCulture)));
+			data.Add(new KeyValuePair<string, string>("ck[]", confirmation.Nonce.ToString(CultureInfo.InvariantCulture)));
 		}
 
 		ObjectResponse<BooleanResponse>? response = await UrlPostToJsonObjectWithSession<BooleanResponse>(request, data: data).ConfigureAwait(false);
@@ -1381,6 +1382,47 @@ public sealed class WebHandler : IDisposable {
 		return response?.Content?.Success;
 	}
 
+	internal async Task<ConfirmationsResponse?> GetConfirmations(string deviceID, string confirmationHash, ulong time) {
+		if (string.IsNullOrEmpty(deviceID)) {
+			throw new ArgumentNullException(nameof(deviceID));
+		}
+
+		if (string.IsNullOrEmpty(confirmationHash)) {
+			throw new ArgumentNullException(nameof(confirmationHash));
+		}
+
+		if (time == 0) {
+			throw new ArgumentOutOfRangeException(nameof(time));
+		}
+
+		if (!Initialized) {
+			byte connectionTimeout = GlobalConfig.DefaultConnectionTimeout;
+
+			for (byte i = 0; (i < connectionTimeout) && !Initialized && Bot.IsConnectedAndLoggedOn; i++) {
+				await Task.Delay(1000).ConfigureAwait(false);
+			}
+
+			if (!Initialized) {
+				return null;
+			}
+		}
+
+		// Confirmations page is notorious for freezing, not returning confirmations and other issues
+		// It's unknown what exactly causes those problems, but restart of the bot fixes those in almost all cases
+		// Normally this wouldn't make any sense, but let's ensure that we've refreshed our session recently as a possible workaround
+		if (DateTime.UtcNow - SessionValidUntil > TimeSpan.FromMinutes(5)) {
+			if (!await RefreshSession().ConfigureAwait(false)) {
+				return null;
+			}
+		}
+
+		Uri request = new(SteamCommunityURL, $"/mobileconf/getlist?a={Bot.user.SteamID}&k={Uri.EscapeDataString(confirmationHash)}&l=english&m=react&p={Uri.EscapeDataString(deviceID)}&t={time}&tag=conf");
+
+		ObjectResponse<ConfirmationsResponse>? response = await UrlGetToJsonObjectWithSession<ConfirmationsResponse>(request, checkSessionPreemptively: false).ConfigureAwait(false);
+
+		return response?.Content;
+	}
+	
 	internal async Task<bool> Init(ulong steamID, EUniverse universe, string webAPIUserNonce, string? parentalCode = null) {
 		if ((steamID == 0) || !new SteamID(steamID).IsIndividualAccount) {
 			throw new ArgumentOutOfRangeException(nameof(steamID));

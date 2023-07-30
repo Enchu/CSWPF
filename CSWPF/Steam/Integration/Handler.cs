@@ -461,8 +461,6 @@ public sealed class ArchiHandler : ClientMsgHandler
             }
             catch (Exception e)
             {
-                
-
                 return null;
             }
 

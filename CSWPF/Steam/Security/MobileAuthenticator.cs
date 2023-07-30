@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using CSWPF.Steam.Data;
 using CSWPF.Utils;
 using CSWPF.Web;
+using CSWPF.Web.Assistance;
 using CSWPF.Web.Core;
+using CSWPF.Web.Responses;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 
 namespace CSWPF.Steam.Security;
@@ -39,7 +44,7 @@ public sealed class MobileAuthenticator : IDisposable {
 	[JsonProperty("shared_secret", Required = Required.Always)]
 	private readonly string SharedSecret = "";
 
-	private Bot? Bot;
+	private Bot? bot;
 
 	[JsonConstructor]
 	private MobileAuthenticator() => CachedDeviceID = new Cacheable<string>(ResolveDeviceID);
@@ -47,8 +52,8 @@ public sealed class MobileAuthenticator : IDisposable {
 	public void Dispose() => CachedDeviceID.Dispose();
 
 	internal async Task<string?> GenerateToken() {
-		if (Bot == null) {
-			throw new InvalidOperationException(nameof(Bot));
+		if (bot == null) {
+			throw new InvalidOperationException(nameof(bot));
 		}
 
 		ulong time = await GetSteamTime().ConfigureAwait(false);
@@ -60,16 +65,14 @@ public sealed class MobileAuthenticator : IDisposable {
 		return GenerateTokenForTime(time);
 	}
 
-	internal async Task<HashSet<Confirmation>?> GetConfirmations() {
-		if (Bot == null) {
+	internal async Task<ImmutableHashSet<Confirmation>?> GetConfirmations() {
+		if (bot == null) {
 			throw new InvalidOperationException(nameof(Bot));
 		}
 
-		(bool success, string? deviceID) = await CachedDeviceID.GetValue().ConfigureAwait(false);
+		(_, string? deviceID) = await CachedDeviceID.GetValue(ECacheFallback.SuccessPreviously).ConfigureAwait(false);
 
-		if (!success || string.IsNullOrEmpty(deviceID)) {
-			Msg.ShowError( nameof(deviceID));
-
+		if (string.IsNullOrEmpty(deviceID)) {
 			return null;
 		}
 
@@ -84,92 +87,20 @@ public sealed class MobileAuthenticator : IDisposable {
 		string? confirmationHash = GenerateConfirmationHash(time, "conf");
 
 		if (string.IsNullOrEmpty(confirmationHash)) {
-			Msg.ShowError(confirmationHash);
-
 			return null;
 		}
 
 		// ReSharper disable RedundantSuppressNullableWarningExpression - required for .NET Framework
-		using IDocument? htmlDocument = await Bot.WebHandler.GetConfirmationsPage(deviceID!, confirmationHash!, time).ConfigureAwait(false);
+		ConfirmationsResponse? response = await bot.WebHandler.GetConfirmations(deviceID!, confirmationHash!, time).ConfigureAwait(false);
 
-		// ReSharper restore RedundantSuppressNullableWarningExpression - required for .NET Framework
-
-		if (htmlDocument == null) {
+		if (response?.Success != true) {
 			return null;
 		}
 
-		IEnumerable<IElement> confirmationNodes = htmlDocument.SelectNodes<IElement>("//div[@class='mobileconf_list_entry']");
-
-		HashSet<Confirmation> result = new();
-
-		foreach (IElement confirmationNode in confirmationNodes) {
-			string? idText = confirmationNode.GetAttribute("data-confid");
-
-			if (string.IsNullOrEmpty(idText)) {
-				Msg.ShowError(idText);
-
-				return null;
-			}
-
-			if (!ulong.TryParse(idText, out ulong id) || (id == 0)) {
-				Msg.ShowError(id.ToString());
-
-				return null;
-			}
-
-			string? keyText = confirmationNode.GetAttribute("data-key");
-
-			if (string.IsNullOrEmpty(keyText)) {
-				Msg.ShowError(keyText);
-
-				return null;
-			}
-
-			if (!ulong.TryParse(keyText, out ulong key) || (key == 0)) {
-				Msg.ShowError(key.ToString());
-
-				return null;
-			}
-
-			string? creatorText = confirmationNode.GetAttribute("data-creator");
-
-			if (string.IsNullOrEmpty(creatorText)) {
-				Msg.ShowError(creatorText);
-
-				return null;
-			}
-
-			if (!ulong.TryParse(creatorText, out ulong creator) || (creator == 0)) {
-				Msg.ShowError(creator.ToString());
-
-				return null;
-			}
-
-			string? typeText = confirmationNode.GetAttribute("data-type");
-
-			if (string.IsNullOrEmpty(typeText)) {
-				Msg.ShowError(typeText.ToString());
-
-				return null;
-			}
-
-			// ReSharper disable once RedundantSuppressNullableWarningExpression - required for .NET Framework
-			if (!Enum.TryParse(typeText!, out Confirmation.EType type) || (type == Confirmation.EType.Unknown)) {
-				Msg.ShowError(type.ToString());
-
-				return null;
-			}
-
-			if (!Enum.IsDefined(type)) {
-				Msg.ShowError( type.ToString());
-
-				return null;
-			}
-
-			result.Add(new Confirmation(id, key, creator, type));
+		foreach (Confirmation? confirmation in response.Confirmations.Where(static confirmation => (confirmation.ConfirmationType == Confirmation.EConfirmationType.Unknown) || !Enum.IsDefined(confirmation.ConfirmationType))) {
 		}
 
-		return result;
+		return response.Confirmations;
 	}
 
 	internal async Task<bool> HandleConfirmations(IReadOnlyCollection<Confirmation> confirmations, bool accept) {
@@ -177,15 +108,14 @@ public sealed class MobileAuthenticator : IDisposable {
 			throw new ArgumentNullException(nameof(confirmations));
 		}
 
-		if (Bot == null) {
+		if (bot == null) {
 			throw new InvalidOperationException(nameof(Bot));
 		}
 
-		(bool success, string? deviceID) = await CachedDeviceID.GetValue().ConfigureAwait(false);
+		(_, string? deviceID) = await CachedDeviceID.GetValue(ECacheFallback.SuccessPreviously).ConfigureAwait(false);
 
-		if (!success || string.IsNullOrEmpty(deviceID)) {
-			Msg.ShowError(nameof(deviceID));
-
+		if (string.IsNullOrEmpty(deviceID)) {
+			
 			return false;
 		}
 
@@ -198,13 +128,12 @@ public sealed class MobileAuthenticator : IDisposable {
 		string? confirmationHash = GenerateConfirmationHash(time, "conf");
 
 		if (string.IsNullOrEmpty(confirmationHash)) {
-			Msg.ShowError(confirmationHash);
-
+			
 			return false;
 		}
 
 		// ReSharper disable RedundantSuppressNullableWarningExpression - required for .NET Framework
-		bool? result = await Bot.WebHandler.HandleConfirmations(deviceID!, confirmationHash!, time, confirmations, accept).ConfigureAwait(false);
+		bool? result = await bot.WebHandler.HandleConfirmations(deviceID!, confirmationHash!, time, confirmations, accept).ConfigureAwait(false);
 
 		// ReSharper restore RedundantSuppressNullableWarningExpression - required for .NET Framework
 
@@ -218,8 +147,14 @@ public sealed class MobileAuthenticator : IDisposable {
 			return true;
 		}
 
+		// Our multi request failed, this is almost always Steam issue that happens randomly
+		// In this case, we'll accept all pending confirmations one-by-one, synchronously (as Steam can't handle them in parallel)
+		// We totally ignore actual result returned by those calls, abort only if request timed out
 		foreach (Confirmation confirmation in confirmations) {
-			bool? confirmationResult = await Bot.WebHandler.HandleConfirmation(deviceID!, confirmationHash!, time, confirmation.ID, confirmation.Key, accept).ConfigureAwait(false);
+			// ReSharper disable RedundantSuppressNullableWarningExpression - required for .NET Framework
+			bool? confirmationResult = await bot.WebHandler.HandleConfirmation(deviceID!, confirmationHash!, time, confirmation.ID, confirmation.Nonce, accept).ConfigureAwait(false);
+
+			// ReSharper restore RedundantSuppressNullableWarningExpression - required for .NET Framework
 
 			if (!confirmationResult.HasValue) {
 				return false;
@@ -229,7 +164,7 @@ public sealed class MobileAuthenticator : IDisposable {
 		return true;
 	}
 
-	internal void Init(Bot bot) => Bot = bot ?? throw new ArgumentNullException(nameof(bot));
+	internal void Init(Bot bot) => this.bot = bot ?? throw new ArgumentNullException(nameof(bot));
 
 	internal static async Task ResetSteamTimeDifference() {
 		if ((SteamTimeDifference == null) && (LastSteamTimeCheck == DateTime.MinValue)) {
@@ -258,8 +193,8 @@ public sealed class MobileAuthenticator : IDisposable {
 			throw new ArgumentOutOfRangeException(nameof(time));
 		}
 
-		if (Bot == null) {
-			throw new InvalidOperationException(nameof(Bot));
+		if (bot == null) {
+			throw new InvalidOperationException(nameof(bot));
 		}
 
 		if (string.IsNullOrEmpty(IdentitySecret)) {
@@ -311,8 +246,8 @@ public sealed class MobileAuthenticator : IDisposable {
 			throw new ArgumentOutOfRangeException(nameof(time));
 		}
 
-		if (Bot == null) {
-			throw new InvalidOperationException(nameof(Bot));
+		if (bot == null) {
+			throw new InvalidOperationException(nameof(bot));
 		}
 
 		if (string.IsNullOrEmpty(SharedSecret)) {
@@ -367,8 +302,8 @@ public sealed class MobileAuthenticator : IDisposable {
 	}
 
 	private async Task<ulong> GetSteamTime() {
-		if (Bot == null) {
-			throw new InvalidOperationException(nameof(Bot));
+		if (bot == null) {
+			throw new InvalidOperationException(nameof(bot));
 		}
 
 		int? steamTimeDifference = SteamTimeDifference;
@@ -404,13 +339,13 @@ public sealed class MobileAuthenticator : IDisposable {
 		return Utilities.MathAdd(Utilities.GetUnixTime(), steamTimeDifference.Value);
 	}
 	
-	internal static ICrossProcessSemaphore? ConfirmationsSemaphore { get; private set; }
+	//internal static ICrossProcessSemaphore? ConfirmationsSemaphore { get; private set; }
 	public static GlobalConfig? GlobalConfig { get; internal set; }
 	
 	private static async Task LimitConfirmationsRequestsAsync() {
-		if (ConfirmationsSemaphore == null) {
+		/*if (ConfirmationsSemaphore == null) {
 			throw new InvalidOperationException(nameof(ConfirmationsSemaphore));
-		}
+		}*/
 
 		byte confirmationsLimiterDelay = GlobalConfig?.ConfirmationsLimiterDelay ?? GlobalConfig.DefaultConfirmationsLimiterDelay;
 
@@ -418,22 +353,22 @@ public sealed class MobileAuthenticator : IDisposable {
 			return;
 		}
 
-		await ConfirmationsSemaphore.WaitAsync().ConfigureAwait(false);
+		//await ConfirmationsSemaphore.WaitAsync().ConfigureAwait(false);
 
 		Utilities.InBackground(
 			async () => {
 				await Task.Delay(confirmationsLimiterDelay * 1000).ConfigureAwait(false);
-				ConfirmationsSemaphore.Release();
+				//ConfirmationsSemaphore.Release();
 			}
 		);
 	}
 
 	private async Task<(bool Success, string? Result)> ResolveDeviceID() {
-		if (Bot == null) {
-			throw new InvalidOperationException(nameof(Bot));
+		if (bot == null) {
+			throw new InvalidOperationException(nameof(bot));
 		}
 
-		string? deviceID = await Bot.ArchiHandler.GetTwoFactorDeviceIdentifier(Bot.SteamID).ConfigureAwait(false);
+		string? deviceID = await bot.ArchiHandler.GetTwoFactorDeviceIdentifier(bot.user.SteamID).ConfigureAwait(false);
 
 		if (string.IsNullOrEmpty(deviceID)) {
 			return (false, null);

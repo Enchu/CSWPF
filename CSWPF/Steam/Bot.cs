@@ -14,14 +14,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSWPF.Directory;
 using CSWPF.Helpers;
+using CSWPF.Steam.Data;
 using CSWPF.Steam.Integration;
 using CSWPF.Steam.Interaction;
 using CSWPF.Steam.Plugns;
 using CSWPF.Steam.Security;
-using CSWPF.Steam.Storage;
 using CSWPF.Utils;
 using CSWPF.Web;
 using CSWPF.Web.Core;
+using CSWPF.Web.Responses;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using SteamKit2;
@@ -55,8 +56,22 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 
 	[JsonIgnore]
 	public SteamConfiguration SteamConfiguration { get; }
-	internal static readonly BotDatabase BotDatabase;
-	public bool HasMobileAuthenticator => BotDatabase.MobileAuthenticator != null;
+	
+	private static MobileAuthenticator? BackingMobileAuthenticator;
+	internal static MobileAuthenticator? MobileAuthenticator {
+		get => BackingMobileAuthenticator;
+
+		set {
+			if (BackingMobileAuthenticator == value) {
+				return;
+			}
+
+			BackingMobileAuthenticator = value;
+			//Utilities.InBackground(Save);
+		}
+	}
+
+	public bool HasMobileAuthenticator => BackingMobileAuthenticator != null;
 	[JsonIgnore]
 	public SteamFriends SteamFriends { get; }
 	
@@ -141,7 +156,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 	{
 		user = userConfig;
 		
-		//BotDatabase.MobileAuthenticator?.Init(this);
+		MobileAuthenticator?.Init(this);
 		
 		WebHandler = new WebHandler(this);
 
@@ -172,9 +187,9 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 		//CallbackManager.Subscribe<SteamUser.LoginKeyCallback>(OnLoginKey);
 		//CallbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(OnMachineAuth);
 		//CallbackManager.Subscribe<SteamUser.WalletInfoCallback>(OnWalletUpdate);
-
+		Actions = new Actions(this);
 	}
-
+	
 	public void Dispose() {
 		// Those are objects that are always being created if constructor doesn't throw exception
 		WebHandler.Dispose();
@@ -299,7 +314,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 
 		if (!HasMobileAuthenticator)
 		{
-			string mobileAuthenticatorFilePath = $@"D:\Game\SDA\maFiles\{user.SteamId}.maFile";
+			string mobileAuthenticatorFilePath = $@"D:\Game\SDA\maFiles\{user.SteamID}.maFile";
 
 			if (string.IsNullOrEmpty(mobileAuthenticatorFilePath))
 			{
@@ -312,18 +327,6 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 			{
 				await ImportAuthenticatorFromFile(mobileAuthenticatorFilePath).ConfigureAwait(false);
 			}
-		}
-		
-		string keysToRedeemFilePath = GetFilePath(EFileType.KeysToRedeem);
-
-		if (string.IsNullOrEmpty(keysToRedeemFilePath)) {
-			Msg.ShowError(keysToRedeemFilePath);
-
-			return;
-		}
-
-		if (File.Exists(keysToRedeemFilePath)) {
-			await ImportKeysToRedeem(keysToRedeemFilePath).ConfigureAwait(false);
 		}
 
 		await Connect().ConfigureAwait(false);
@@ -493,8 +496,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 			if (!TryImportAuthenticator(authenticator)) {
 				return;
 			}
-
-			File.Delete(maFilePath);
+			
 		} catch (Exception e) {
 			Msg.ShowError(e.ToString());
 		}
@@ -508,7 +510,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 		}
 
 		authenticator.Init(this);
-		BotDatabase.MobileAuthenticator = authenticator;
+		MobileAuthenticator = authenticator;
 		
 		return true;
 	}
@@ -585,9 +587,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 
 	private async void OnDisconnected(SteamClient.DisconnectedCallback callback) {
 		ArgumentNullException.ThrowIfNull(callback);
-
 		
-
 		EResult lastLogOnResult = LastLogOnResult;
 		LastLogOnResult = EResult.Invalid;
 		HeartBeatFailures = 0;
@@ -674,7 +674,7 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
                    
 				WebHandler.OnVanityURLChanged(callback.VanityURL);
 
-				if (!await WebHandler.Init(user.SteamId, SteamClient.Universe, callback.WebAPIUserNonce ?? throw new InvalidOperationException(nameof(callback.WebAPIUserNonce))).ConfigureAwait(false))
+				if (!await WebHandler.Init(user.SteamID, SteamClient.Universe, callback.WebAPIUserNonce ?? throw new InvalidOperationException(nameof(callback.WebAPIUserNonce))).ConfigureAwait(false))
 				{
 					if (!await RefreshSession().ConfigureAwait(false))
 					{
@@ -777,61 +777,6 @@ public sealed class Bot : IAsyncDisposable, IDisposable {
 		WalletBalance = callback.LongBalance;
 		WalletCurrency = callback.Currency;
 	}
-
-	/*private (bool IsSteamParentalEnabled, string? SteamParentalCode) ValidateSteamParental(ParentalSettings settings, string? steamParentalCode = null, bool allowGeneration = true) {
-		ArgumentNullException.ThrowIfNull(settings);
-
-		if (!settings.is_enabled) {
-			return (false, null);
-		}
-
-		if (settings.passwordhash.Length > byte.MaxValue) {
-			throw new ArgumentOutOfRangeException(nameof(settings));
-		}
-
-		ArchiCryptoHelper.EHashingMethod steamParentalHashingMethod;
-
-		switch (settings.passwordhashtype) {
-			case 4:
-				steamParentalHashingMethod = ArchiCryptoHelper.EHashingMethod.Pbkdf2;
-
-				break;
-			case 6:
-				steamParentalHashingMethod = ArchiCryptoHelper.EHashingMethod.SCrypt;
-
-				break;
-			default:
-				return (true, null);
-		}
-
-		if (!string.IsNullOrEmpty(steamParentalCode)) {
-			byte i = 0;
-
-			// ReSharper disable once RedundantSuppressNullableWarningExpression - required for .NET Framework
-			byte[] password = new byte[steamParentalCode!.Length];
-
-			foreach (char character in steamParentalCode.TakeWhile(static character => character is >= '0' and <= '9')) {
-				password[i++] = (byte) character;
-			}
-
-			if (i >= steamParentalCode.Length) {
-				byte[] passwordHash = ArchiCryptoHelper.Hash(password, settings.salt, (byte) settings.passwordhash.Length, steamParentalHashingMethod);
-
-				if (passwordHash.SequenceEqual(settings.passwordhash)) {
-					return (true, steamParentalCode);
-				}
-			}
-		}
-
-		if (!allowGeneration) {
-			return (true, null);
-		}
-		
-		steamParentalCode = ArchiCryptoHelper.RecoverSteamParentalCode(settings.passwordhash, settings.salt, steamParentalHashingMethod);
-
-
-		return (true, steamParentalCode);
-	}*/
 
 	public enum EFileType : byte {
 		Config,

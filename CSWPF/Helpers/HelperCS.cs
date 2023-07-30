@@ -26,11 +26,11 @@ public partial class HelperCS : System.Windows.Forms.Form
     public static void SaveNew(User user, string steamid, string sharedSecret)
     {
         User allUsers = new User(user.Login, user.Password);
-        allUsers.SteamId = Convert.ToUInt64(steamid);
-        allUsers.SID = allUsers.SteamId - 76561197960265728L;
+        allUsers.SteamID = Convert.ToUInt64(steamid);
+        allUsers.SID = allUsers.SteamID - 76561197960265728L;
         allUsers.SharedSecret = sharedSecret;
         allUsers.Prime = false;
-        if(allUsers.SteamId == 0)
+        if(allUsers.SteamID == 0)
         {
             return;
         }
@@ -46,20 +46,18 @@ public partial class HelperCS : System.Windows.Forms.Form
             var currentUsers = JsonConvert.DeserializeObject<maFile>(File.ReadAllText(filename));
             if (currentUsers.AccountName == user.Login)
             {
-                allUsers.SteamId = currentUsers.Session.SteamId;
+                allUsers.SteamID = currentUsers.Session.SteamId;
                 allUsers.SharedSecret = currentUsers.SharedSecret;
                 allUsers.Prime = false;
             }
         }
-        if(allUsers.SteamId == 0)
+        if(allUsers.SteamID == 0)
         {
             return;
         }
 
         File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + allUsers.Login + ".json", JsonConvert.SerializeObject(allUsers));
     }
-
-    
 
     public async Task TradeInventory(User user)
     {
@@ -68,7 +66,7 @@ public partial class HelperCS : System.Windows.Forms.Form
         Bot newBot = new Bot(users);
         await newBot.Start();
         await Task.Delay(30000);
-        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamId);
+        inventory = await newBot.WebHandler.GetInventoryAsync(users.SteamID);
         if (inventory.Count > 0)
         {
             //WebHandler.SendTradeOffer(inventory.);

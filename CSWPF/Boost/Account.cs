@@ -13,7 +13,7 @@ public class Account
     [DataMember(Name = "login")]
     public string Login { get; set; }
 
-    [DataMember(Name = "passw")]
+    [DataMember(Name = "password")]
     public string Password { get; set; }
     
     [DataMember(Name = "isuse")]

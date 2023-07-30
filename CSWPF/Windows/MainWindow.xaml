@@ -73,8 +73,12 @@
             <TextBox Width="300" Height="40" Margin="5" Name="PasswordTextBox"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Name="PanelPos">
                 <Button Click="AddBtClick" Width="150" Height="40" Margin="5" Content="Добавить"/>
-                <Button Click="BackBtClick" Width="150" Height="40" Margin="5" Content="Назад"/>
             </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Name="PanelForSettings" Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+            <TextBox Name="TBSteamPath" Width="300"/>
+            <TextBox Name="TBCSPath" Width="300"/>
         </StackPanel>
         
     </Grid>

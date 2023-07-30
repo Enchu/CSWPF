@@ -33,6 +33,7 @@ namespace CSWPF.Windows
             {
                 User allUsers = JsonConvert.DeserializeObject<User>(File.ReadAllText(filename));
                 allUsers.CheckAccount();
+                allUsers.CheckSID();
                 _users.Add(allUsers);
             }
         }
@@ -351,7 +352,7 @@ namespace CSWPF.Windows
         {
             CollapsedAll(Visibility.Visible);
             PanelForAdd.Visibility = Visibility.Collapsed;
-            //PanelForSettings.Visibility = Visibility.Collapsed;
+            PanelForSettings.Visibility = Visibility.Collapsed;
         }
 
         private void AddClick(object sender, RoutedEventArgs e)
@@ -404,7 +405,7 @@ namespace CSWPF.Windows
         private void SettingClick(object sender, RoutedEventArgs e)
         {
             CollapsedAll(Visibility.Collapsed);
-            //PanelForSettings.Visibility = Visibility.Visible;
+            PanelForSettings.Visibility = Visibility.Visible;
         }
     }
 }
