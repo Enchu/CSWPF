@@ -9,6 +9,7 @@ using CSWPF.Steam;
 using CSWPF.Utils;
 using Newtonsoft.Json;
 using Confirmation = CSWPF.Steam.Security.Confirmation;
+using CSWPF.Direct;
 
 namespace CSWPF.Helpers;
 
@@ -25,7 +26,7 @@ public partial class HelperCS : System.Windows.Forms.Form
 
     public static void SaveNew(User user, string steamid, string sharedSecret)
     {
-        User allUsers = new User(user.Login, user.Password);
+        User allUsers = new User();
         allUsers.SteamID = Convert.ToUInt64(steamid);
         allUsers.SID = allUsers.SteamID - 76561197960265728L;
         allUsers.SharedSecret = sharedSecret;
@@ -40,7 +41,7 @@ public partial class HelperCS : System.Windows.Forms.Form
 
     public static void SaveToDB(User user)
     {
-        User allUsers = new User(user.Login, user.Password);
+        User allUsers = new User();
         foreach (string filename in System.IO.Directory.GetFiles($"{Settings.SDA}maFiles", "*.maFile"))
         {
             var currentUsers = JsonConvert.DeserializeObject<maFile>(File.ReadAllText(filename));

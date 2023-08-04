@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 
-namespace CSWPF.Directory;
-
-public static class Log
+namespace CSWPF.Utils
+{
+    public static class Log
     {
         private static object _semaphore = new object();
 
@@ -129,3 +131,4 @@ public static class Log
             }
         }
     }
+}

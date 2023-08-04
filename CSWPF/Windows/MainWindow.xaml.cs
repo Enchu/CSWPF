@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CSWPF.Direct;
 using CSWPF.Directory;
 using CSWPF.Helpers;
 using CSWPF.Utils;
@@ -26,14 +27,12 @@ namespace CSWPF.Windows
 {
     public partial class MainWindow
     {
-        private static List<User> _users = new();
+        private static List<Account> _users = new();
         private static void Check()
         {
             foreach (var filename in System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory() + @"\Account\", "*.json"))
             {
-                User allUsers = JsonConvert.DeserializeObject<User>(File.ReadAllText(filename));
-                allUsers.CheckAccount();
-                allUsers.CheckSID();
+                Account allUsers = JsonConvert.DeserializeObject<Account>(File.ReadAllText(filename));
                 _users.Add(allUsers);
             }
         }
@@ -44,9 +43,34 @@ namespace CSWPF.Windows
             CreateChildren();
             _users.Clear();
         }
-        
-        public string StatusBarColor { get; set; }
-        
+
+        private void createButton(string iconsName ,MouseButtonEventHandler click, StackPanel stackPanel, string login)
+        {
+            Button button = new Button();
+            Image image = new Image();
+            image.Stretch = Stretch.Uniform;
+            image.Source = new BitmapImage(new Uri($"pack://application:,,,/Icons/{iconsName}"));
+            button.Content = image;
+            button.Style = this.FindResource("ImageButtonStyle") as Style;
+            button.MouseUp += click;
+            button.Tag = login;
+
+            stackPanel.Children.Add(button);
+        }
+
+        private void createCheckBox(string content, StackPanel stackPanel)
+        {
+            CheckBox checkBox = new CheckBox();
+            checkBox.Margin = new Thickness(5);
+            checkBox.Content = content;
+            /*
+              checkBoxPrime.IsChecked = db.Prime;
+              checkBoxPrime.Checked += db.CheckPrime;
+             */
+
+            stackPanel.Children.Add(checkBox);
+        }
+
         private void CreateChildren()
         {
             foreach (var db in _users)
@@ -58,71 +82,25 @@ namespace CSWPF.Windows
                 var login = new Label();
                 login.Content = db.Login;
                 PanelForLogin.Children.Add(login);
-                
+
                 //password
-                var password = new Button();
-                Image passwordContent = new Image();
-                passwordContent.Stretch = Stretch.Uniform;
-                passwordContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/screwdriver.png"));
-                password.Content = passwordContent;
-                password.Style = this.FindResource("ImageButtonStyle") as Style;
-                password.Click += db.ClickPassword;
-                PanelForPassword.Children.Add(password);
-                
+                createButton("screwdriver.png", ClickPassword, PanelForPassword, db.Login);
+
                 //start
-                var startCS = new Button();
-                Image startCSContent = new Image();
-                startCSContent.Stretch = Stretch.Uniform;
-                startCSContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/cow.png"));
-                startCS.Content = startCSContent;
-                startCS.Style = this.FindResource("ImageButtonStyle") as Style;
-                //startCS.Style = Application.Current.FindResource("ImageButtonStyle") as Style;
-                startCS.Click += db.ClickStart;
-                stackPanel.Children.Add(startCS);
+                createButton("cow.png", ClickStart, stackPanel, db.Login);
                 
                 //kill
-                var killCS = new Button();
-                Image killCsContent = new Image();
-                killCsContent.Stretch = Stretch.Uniform;
-                killCsContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/cloud-lightning.png"));
-                killCS.Content = killCsContent;
-                killCS.Style = this.FindResource("ImageButtonStyle") as Style;
-                killCS.Click += db.ClickKill;
-                PanelForKill.Children.Add(killCS);
-                
+                createButton("cloud-lightning.png", ClickKill, PanelForKill, db.Login);
+
                 //open Steam
-                var openSteam = new Button();
-                openSteam.Content = "Steam";
-                openSteam.Click += db.ClickOpenSteam;
-                //PanelForOpenSteam.Children.Add(openSteam);
+                createButton("steam.png", ClickOpenSteam, PanelForOpenSteam, db.Login);
 
                 //checkbox
-                CheckBox checkBoxFinal = new CheckBox();
-                checkBoxFinal.Margin = new Thickness(5);
-                checkBoxFinal.Content = "F";
-                stackPanel.Children.Add(checkBoxFinal);
-
-                CheckBox checkBoxPrime = new CheckBox();
-                checkBoxPrime.Margin = new Thickness(5);
-                checkBoxPrime.Content = "Prime";
-                checkBoxPrime.IsChecked = db.Prime;
-                checkBoxPrime.Checked += db.CheckPrime;
-                stackPanel.Children.Add(checkBoxPrime);
+                createCheckBox("F", stackPanel);
+                createCheckBox("Prime", stackPanel);
 
                 //invent and trade
-                var checkInventory = new Button();
-                Image checkInventoryContent = new Image();
-                checkInventoryContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/irrigation.png"));
-                checkInventory.Content = checkInventoryContent;
-                checkInventory.Style = this.FindResource("ImageButtonStyle") as Style;
-                checkInventory.Click += db.ClickCheckInventory;
-                stackPanel.Children.Add(checkInventory);
-                
-                //StatusBar
-                /*StatusBar statusBar = new StatusBar();
-                statusBar.Background = Brushes.Red;
-                statusBar.Style = this.FindResource("StatusBarStyle") as Style;
-                stackPanel.Children.Add(statusBar);*/
+                createButton("irrigation.png", ClickTrade, stackPanel, db.Login);
 
                 PanelForStart.Children.Add(stackPanel);
             }
@@ -130,185 +108,39 @@ namespace CSWPF.Windows
             _users.Clear();
         }
 
-        public SteamGuardAccount account;
-        private async void AddSDA()
+        Account account;
+        
+        private void ClickPassword(object sender, RoutedEventArgs e)
         {
-            string username = LoginTextBox.Text;
-            string password = PasswordTextBox.Text;
-
-            SteamClient steamClient = new SteamClient();
-            steamClient.Connect();
-
-            while (!steamClient.IsConnected)
-            {
-                await Task.Delay(500);
-            }
             
-            CredentialsAuthSession authSession;
-            try
-            {
-                authSession = await steamClient.Authentication.BeginAuthSessionViaCredentialsAsync(
-                    new AuthSessionDetails
-                    {
-                        Username = username,
-                        Password = password,
-                        IsPersistentSession = false,
-                        PlatformType = EAuthTokenPlatformType.k_EAuthTokenPlatformType_MobileApp,
-                        ClientOSType = EOSType.Android9,
-                        Authenticator = new UserFormAuthenticator(this.account),
-                    });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Steam Login Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                return;
-            }
-            
-            AuthPollResult pollResponse;
-            try
-            {
-                pollResponse = await authSession.PollingWaitForResultAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Steam Login Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                return;
-            }
+            Clipboard.SetText(((Button)sender).Tag.ToString());
+        }
 
-            SessionData sessionData = new SessionData()
-            {
-                SteamID = authSession.SteamID.ConvertToUInt64(),
-            };
+        private void ClickStart(object sender, RoutedEventArgs e)
+        {
 
-            MessageBox.Show(sessionData.ToString());
-            
-            var result = MessageBox.Show("Steam account login succeeded. Press OK to continue adding SDA as your authenticator.", "Steam Login", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
-            if (result == System.Windows.Forms.DialogResult.Cancel)
-            {
-                MessageBox.Show("Adding authenticator aborted.", "Steam Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                LoginTextBox.IsEnabled = true;
-                LoginTextBox.Text = "Login";
-                return;
-            }
-            
-            AuthenticatorLinker linker = new AuthenticatorLinker(sessionData);
-            AuthenticatorLinker.LinkResult linkResponse = AuthenticatorLinker.LinkResult.GeneralFailure;
-            
-            while (linkResponse != AuthenticatorLinker.LinkResult.AwaitingFinalization)
-            {
-                try
-                {
-                    linkResponse = linker.AddAuthenticator();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error adding your authenticator: " + ex.Message, "Steam Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LoginTextBox.IsEnabled = true;
-                    LoginTextBox.Text = "Login";
-                    return;
-                }
-            }
-            
-            Manifest manifest = Manifest.GetManifest();
-            string passKey = null;
-            if (manifest.Entries.Count == 0)
-            {
-                passKey = manifest.PromptSetupPassKey("Please enter an encryption passkey. Leave blank or hit cancel to not encrypt (VERY INSECURE).");
-            }
-            else if (manifest.Entries.Count > 0 && manifest.Encrypted)
-            {
-                bool passKeyValid = false;
-                while (!passKeyValid)
-                {
-                    InputForm passKeyForm = new InputForm("Please enter your current encryption passkey.");
-                    passKeyForm.ShowDialog();
-                    if (!passKeyForm.Canceled)
-                    {
-                        passKey = passKeyForm.txtBox.Text;
-                        passKeyValid = manifest.VerifyPasskey(passKey);
-                        if (!passKeyValid)
-                        {
-                            MessageBox.Show("That passkey is invalid. Please enter the same passkey you used for your other accounts.");
-                        }
-                    }
-                    else
-                    {
-                        this.Close();
-                        return;
-                    }
-                }
-            }
-            
-            //Save the file immediately; losing this would be bad.
-            if (!manifest.SaveAccount(linker.LinkedAccount, passKey != null, passKey))
-            {
-                manifest.RemoveAccount(linker.LinkedAccount);
-                MessageBox.Show("Unable to save mobile authenticator file. The mobile authenticator has not been linked.");
-                this.Close();
-                return;
-            }
+        }
 
-            MessageBox.Show("The Mobile Authenticator has not yet been linked. Before finalizing the authenticator, please write down your revocation code: " + linker.LinkedAccount.RevocationCode);
+        private void ClickKill(object sender, RoutedEventArgs e)
+        {
 
-            AuthenticatorLinker.FinalizeResult finalizeResponse = AuthenticatorLinker.FinalizeResult.GeneralFailure;
-            while (finalizeResponse != AuthenticatorLinker.FinalizeResult.Success)
-            {
-                InputForm smsCodeForm = new InputForm("Please input the SMS code sent to your phone.");
-                smsCodeForm.ShowDialog();
-                if (smsCodeForm.Canceled)
-                {
-                    manifest.RemoveAccount(linker.LinkedAccount);
-                    this.Close();
-                    return;
-                }
-
-                InputForm confirmRevocationCode = new InputForm("Please enter your revocation code to ensure you've saved it.");
-                confirmRevocationCode.ShowDialog();
-                if (confirmRevocationCode.txtBox.Text.ToUpper() != linker.LinkedAccount.RevocationCode)
-                {
-                    MessageBox.Show("Revocation code incorrect; the authenticator has not been linked.");
-                    manifest.RemoveAccount(linker.LinkedAccount);
-                    this.Close();
-                    return;
-                }
-
-                string smsCode = smsCodeForm.txtBox.Text;
-                finalizeResponse = linker.FinalizeAddAuthenticator(smsCode);
-
-                switch (finalizeResponse)
-                {
-                    case AuthenticatorLinker.FinalizeResult.BadSMSCode:
-                        continue;
-
-                    case AuthenticatorLinker.FinalizeResult.UnableToGenerateCorrectCodes:
-                        MessageBox.Show("Unable to generate the proper codes to finalize this authenticator. The authenticator should not have been linked. In the off-chance it was, please write down your revocation code, as this is the last chance to see it: " + linker.LinkedAccount.RevocationCode);
-                        manifest.RemoveAccount(linker.LinkedAccount);
-                        this.Close();
-                        return;
-
-                    case AuthenticatorLinker.FinalizeResult.GeneralFailure:
-                        MessageBox.Show("Unable to finalize this authenticator. The authenticator should not have been linked. In the off-chance it was, please write down your revocation code, as this is the last chance to see it: " + linker.LinkedAccount.RevocationCode);
-                        manifest.RemoveAccount(linker.LinkedAccount);
-                        this.Close();
-                        return;
-                }
-            }
-
-            //Linked, finally. Re-save with FullyEnrolled property.
-            manifest.SaveAccount(linker.LinkedAccount, passKey != null, passKey);
-            MessageBox.Show("Mobile authenticator successfully linked. Please write down your revocation code: " + linker.LinkedAccount.RevocationCode);
-            //Add new user
-            User newUser = new User(LoginTextBox.Text, PasswordTextBox.Text);
-            HelperCS.SaveNew(newUser,linker.LinkedAccount.IdentitySecret ,linker.LinkedAccount.SharedSecret);
         }
         
+        private void ClickOpenSteam(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ClickTrade(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void AddBtClick(object sender, RoutedEventArgs e)
         {
             if (Msg.ShowQuestion("Вы действительно хотите добавить?"))
             {
-                User newUser = new User(LoginTextBox.Text, PasswordTextBox.Text);
+                User newUser = new User();
                 LoginTextBox.Clear();
                 PasswordTextBox.Clear();
                 

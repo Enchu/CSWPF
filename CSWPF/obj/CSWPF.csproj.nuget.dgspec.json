@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj": {}
+    "C:\\Users\\aleksejgermanov\\source\\repos\\CSWPF\\CSWPF\\CSWPF.csproj": {}
   },
   "projects": {
-    "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj": {
+    "C:\\Users\\aleksejgermanov\\source\\repos\\CSWPF\\CSWPF\\CSWPF.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
+        "projectUniqueName": "C:\\Users\\aleksejgermanov\\source\\repos\\CSWPF\\CSWPF\\CSWPF.csproj",
         "projectName": "CSWPF",
-        "projectPath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
-        "packagesPath": "C:\\Users\\aleck\\.nuget\\packages\\",
-        "outputPath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\obj\\",
+        "projectPath": "C:\\Users\\aleksejgermanov\\source\\repos\\CSWPF\\CSWPF\\CSWPF.csproj",
+        "packagesPath": "C:\\Users\\aleksejgermanov\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\aleksejgermanov\\source\\repos\\CSWPF\\CSWPF\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\aleck\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\aleksejgermanov\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [

@@ -10,10 +10,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using CSWPF.Directory.Assist;
-using CSWPF.Directory.Models;
 using CSWPF.Helpers;
 using CSWPF.Utils;
+using CSWPF.Direct;
+using CSWPF.Boost;
+using CSWPF.Boost.Models;
 
 namespace CSWPF.Directory;
 
@@ -210,8 +211,8 @@ public class AccountHelper
               }
               if (lower.StartsWith("steam_"))
               {
-                long userid;
-                if (long.TryParse(lower.Replace("steam_", ""), out userid))
+                ulong userid;
+                if (ulong.TryParse(lower.Replace("steam_", ""), out userid))
                 {
                   Account account = source.FirstOrDefault<Account>((Func<Account, bool>) (o => o.SID == userid));
                   if (account != null)
@@ -274,12 +275,12 @@ public class AccountHelper
                   {
                     int num1 = rect.Right - rect.Left;
                     int num2 = rect.Bottom - rect.Top;
-                    if (a.X != rect.Left || a.Y != rect.Top || a.W != num1 || a.H != num2)
+                    if (a.X != rect.Left || a.Y != rect.Top || Settings.W != num1 || Settings.H != num2)
                     {
                       a.X = rect.Left;
                       a.Y = rect.Top;
-                      a.W = num1;
-                      a.H = num2;
+                      Settings.W = num1;
+                      Settings.H = num2;
                       flag1 = true;
                     }
                   }
@@ -320,7 +321,7 @@ public class AccountHelper
         {
           foreach (Lobby lobby2 in (List<Lobby>) LobbyDb.G)
           {
-            account = lobby2.Accounts.FirstOrDefault<Account>((Func<Account, bool>) (o => !string.IsNullOrEmpty(o.Steamid64) && o.Steamid64.Equals(gs.Player.SteamID)));
+            account = lobby2.Accounts.FirstOrDefault<Account>((Func<Account, bool>) (o => !string.IsNullOrEmpty(Convert.ToString(o.SteamID)) && o.SteamID.Equals(gs.Player.SteamID)));
             if (account != null)
             {
               lobby1 = lobby2;
@@ -338,7 +339,7 @@ public class AccountHelper
 
     public static Process GetProcess(Account account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
-    public static Process GetProcess(AccountData account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.login)))?.Item2;
+    public static Process GetProcess(User account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
     public static Process GetProcessSteam(Account account) => AccountHelper.ActiveSteamList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
@@ -394,14 +395,14 @@ public class AccountHelper
       Account leader1 = lobby.Leader1;
       Account leader2 = lobby.Leader2;
       AccountHelper.UpdateCFG(leader1);
-      long sid1 = leader1.SID;
+      long sid1 = (long)leader1.SID;
       string login1 = leader1.Login;
       string str1 = checkedPath + "\\csgo_" + sid1.ToString();
       AccountHelper.lineChanger("\tgame\t\"@ ACCOUNT: " + sid1.ToString() + " | LOGIN: " + login1 + " | LEADER #1\"", str1 + "/gameinfo.txt", 3);
       AccountHelper.FixAutoexec(leader1);
       File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", str1 + "\\cfg\\gamestate_integration_boost.cfg", true);
       AccountHelper.UpdateCFG(leader2);
-      long sid2 = leader2.SID;
+      long sid2 = (long)leader2.SID;
       string login2 = leader2.Login;
       string str2 = checkedPath + "\\csgo_" + sid2.ToString();
       AccountHelper.lineChanger("\tgame\t\"@ ACCOUNT: " + sid2.ToString() + " | LOGIN: " + login2 + " | LEADER #2\"", str2 + "/gameinfo.txt", 3);
@@ -447,7 +448,7 @@ public class AccountHelper
         string str1 = System.IO.Directory.GetCurrentDirectory() + "/launcher/Launcher.exe";
         string checkedPath = AccountHelper.GetCheckedPath(Options.G.StreamPath);
         string str2 = Options.G.IsHideLauncher ? "1" : "0";
-        string str3 = " \"" + account.Login + "\"" + (" \"" + account.Login + "\"") + (" \"" + account.Password + "\"") + (" \"" + account.Lobby.Parameters + "\"") + (" " + account.Steamid64) + string.Format(" {0}", (object) account.SID) + (" \"" + account.Lobby.Leader1.Login + "\"") + (" \"" + account.Lobby.Leader2.Login + "\"") + string.Format(" {0}", (object) account.X) + string.Format(" {0}", (object) account.Y) + " 640" + " 480" + (" " + str2) + (" \"" + checkedPath + "\"");
+        string str3 = " \"" + account.Login + "\"" + (" \"" + account.Login + "\"") + (" \"" + account.Password + "\"") + (" \"" + account.Lobby.Parameters + "\"") + (" " + account.SteamID) + string.Format(" {0}", (object) account.SID) + (" \"" + account.Lobby.Leader1.Login + "\"") + (" \"" + account.Lobby.Leader2.Login + "\"") + string.Format(" {0}", (object) account.X) + string.Format(" {0}", (object) account.Y) + " 640" + " 480" + (" " + str2) + (" \"" + checkedPath + "\"");
         new Process()
         {
           StartInfo = new ProcessStartInfo()
@@ -664,7 +665,7 @@ public class AccountHelper
       }, StringSplitOptions.None);
       string str4 = Regex.Match(array[Array.IndexOf<string>(array, "\t\t\"AccountName\"\t\t\"" + lower + "\"") - 2], "\"([^\"]+)").Groups[1].Value;
       string s = !string.IsNullOrEmpty(str4) ? str4 : throw new Exception("Не удалось получить STEAMID64");
-      long result;
+      long result = 0;
       if (!long.TryParse(s, out result))
         throw new Exception("Не удалось получить STEAMID64");
       result -= 76561197960265728L;
@@ -672,8 +673,8 @@ public class AccountHelper
         throw new Exception("Не удалось получить STEAMID64");
       Account leader1 = account.Lobby.Leader1;
       Account leader2 = account.Lobby.Leader2;
-      account.Steamid64 = s;
-      account.SID = result;
+      account.SteamID = Convert.ToUInt64(s);
+      account.SID = (ulong)result;
       string str5 = path + "csgo_" + result.ToString();
       if (!File.Exists(str1 + "Steam_" + result.ToString() + ".exe"))
         File.Copy(str2, str1 + "Steam_" + result.ToString() + ".exe");

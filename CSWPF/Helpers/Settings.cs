@@ -19,8 +19,10 @@ public class Settings
     public static readonly string StartSteam = "-silent -vgui";
     public static readonly string ImgEconomy = "https://community.cloudflare.steamstatic.com/economy/image/";
     public static readonly string TokenID = "_TOKyI1G";
-    public static readonly int X = 0;
-    public static readonly int Y = 0;
+    public static int X = 0;
+    public static int Y = 0;
+    public static int W = 320;
+    public static int H = 320;
     private static void SetFileReadAccess(string FileName, bool SetReadOnly) => new FileInfo(FileName).IsReadOnly = SetReadOnly;
     private static bool IsFileReadOnly(string FileName) => new FileInfo(FileName).IsReadOnly;
 
