@@ -39,6 +39,11 @@ public class User
         Password = password;
     }
 
+    public void ClickLogin(object sender, RoutedEventArgs e)
+    {
+        Clipboard.SetText(Login);
+    }
+
     public void ClickPassword(object sender, RoutedEventArgs e)
     {
         Clipboard.SetText(Password);

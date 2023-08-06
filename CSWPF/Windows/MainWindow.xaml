@@ -77,8 +77,9 @@
         </StackPanel>
         
         <StackPanel Grid.Row="1" Name="PanelForSettings" Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
-            <TextBox Name="TBSteamPath" Width="300"/>
-            <TextBox Name="TBCSPath" Width="300"/>
+            <Button Width="32" Height="32" Margin="5" Click="TBSteamPathClick" Style="{StaticResource ImageButtonStyle}" >
+                <Image Stretch="Uniform" Source="../Icons/steam.png"/>
+            </Button>
         </StackPanel>
         
     </Grid>

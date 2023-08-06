@@ -52,6 +52,8 @@
       <None Remove="Icons\wifi.ico" />
       <Resource Include="Icons\wifi.ico" />
       <None Remove="Icons\irrigation.png" />
+      <None Remove="Icons\steam.png" />
+      <Resource Include="Icons\steam.png" />
     </ItemGroup>
 
     <ItemGroup>

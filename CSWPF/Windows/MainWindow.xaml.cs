@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CSWPF.Directory;
@@ -45,8 +46,32 @@ namespace CSWPF.Windows
             _users.Clear();
         }
         
-        public string StatusBarColor { get; set; }
-        
+        private void createButton(string iconsName ,MouseButtonEventHandler click, StackPanel stackPanel, string login)
+        {
+            Button button = new Button();
+            Image image = new Image();
+            image.Stretch = Stretch.Uniform;
+            image.Source = new BitmapImage(new Uri($"pack://application:,,,/Icons/{iconsName}"));
+            button.Content = image;
+            button.Style = this.FindResource("ImageButtonStyle") as Style;
+            button.MouseUp += click;
+            button.Tag = login;
+
+            stackPanel.Children.Add(button);
+        }
+
+        private void createCheckBox(string content, StackPanel stackPanel)
+        {
+            CheckBox checkBox = new CheckBox();
+            checkBox.Margin = new Thickness(5);
+            checkBox.Content = content;
+            /*
+              checkBoxPrime.IsChecked = db.Prime;
+              checkBoxPrime.Checked += db.CheckPrime;
+             */
+            stackPanel.Children.Add(checkBox);
+        }
+
         private void CreateChildren()
         {
             foreach (var db in _users)
@@ -55,74 +80,29 @@ namespace CSWPF.Windows
                 stackPanel.Orientation = Orientation.Horizontal;
                 
                 //login
-                var login = new Label();
+                var login = new Button();
                 login.Content = db.Login;
+                login.Click += db.ClickLogin;
                 PanelForLogin.Children.Add(login);
-                
+
                 //password
-                var password = new Button();
-                Image passwordContent = new Image();
-                passwordContent.Stretch = Stretch.Uniform;
-                passwordContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/screwdriver.png"));
-                password.Content = passwordContent;
-                password.Style = this.FindResource("ImageButtonStyle") as Style;
-                password.Click += db.ClickPassword;
-                PanelForPassword.Children.Add(password);
-                
+                createButton("screwdriver.png", db.ClickLogin, PanelForPassword, db.Login);
+
                 //start
-                var startCS = new Button();
-                Image startCSContent = new Image();
-                startCSContent.Stretch = Stretch.Uniform;
-                startCSContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/cow.png"));
-                startCS.Content = startCSContent;
-                startCS.Style = this.FindResource("ImageButtonStyle") as Style;
-                //startCS.Style = Application.Current.FindResource("ImageButtonStyle") as Style;
-                startCS.Click += db.ClickStart;
-                stackPanel.Children.Add(startCS);
+                createButton("cow.png", db.ClickStart, stackPanel, db.Login);
                 
                 //kill
-                var killCS = new Button();
-                Image killCsContent = new Image();
-                killCsContent.Stretch = Stretch.Uniform;
-                killCsContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/cloud-lightning.png"));
-                killCS.Content = killCsContent;
-                killCS.Style = this.FindResource("ImageButtonStyle") as Style;
-                killCS.Click += db.ClickKill;
-                PanelForKill.Children.Add(killCS);
-                
+                createButton("cloud-lightning.png", db.ClickKill, PanelForKill, db.Login);
+
                 //open Steam
-                var openSteam = new Button();
-                openSteam.Content = "Steam";
-                openSteam.Click += db.ClickOpenSteam;
-                //PanelForOpenSteam.Children.Add(openSteam);
+                createButton("steam.png", db.ClickOpenSteam, PanelForOpenSteam, db.Login);
 
                 //checkbox
-                CheckBox checkBoxFinal = new CheckBox();
-                checkBoxFinal.Margin = new Thickness(5);
-                checkBoxFinal.Content = "F";
-                stackPanel.Children.Add(checkBoxFinal);
-
-                CheckBox checkBoxPrime = new CheckBox();
-                checkBoxPrime.Margin = new Thickness(5);
-                checkBoxPrime.Content = "Prime";
-                checkBoxPrime.IsChecked = db.Prime;
-                checkBoxPrime.Checked += db.CheckPrime;
-                stackPanel.Children.Add(checkBoxPrime);
+                createCheckBox("F", stackPanel);
+                createCheckBox("Prime", stackPanel);
 
                 //invent and trade
-                var checkInventory = new Button();
-                Image checkInventoryContent = new Image();
-                checkInventoryContent.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/irrigation.png"));
-                checkInventory.Content = checkInventoryContent;
-                checkInventory.Style = this.FindResource("ImageButtonStyle") as Style;
-                checkInventory.Click += db.ClickCheckInventory;
-                stackPanel.Children.Add(checkInventory);
-                
-                //StatusBar
-                /*StatusBar statusBar = new StatusBar();
-                statusBar.Background = Brushes.Red;
-                statusBar.Style = this.FindResource("StatusBarStyle") as Style;
-                stackPanel.Children.Add(statusBar);*/
+                createButton("irrigation.png", db.ClickCheckInventory, stackPanel, db.Login);
 
                 PanelForStart.Children.Add(stackPanel);
             }
@@ -406,6 +386,13 @@ namespace CSWPF.Windows
         {
             CollapsedAll(Visibility.Collapsed);
             PanelForSettings.Visibility = Visibility.Visible;
+        }
+
+        private void TBSteamPathClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fm = new OpenFileDialog();
+            fm.ShowDialog();
+            Msg.ShowInfo(Path.GetFullPath(fm.FileName));
         }
     }
 }
