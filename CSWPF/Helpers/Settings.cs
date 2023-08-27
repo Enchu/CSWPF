@@ -15,6 +15,8 @@ public class Settings
     public static string SteamGamePath = @"D:\Steam\steamapps\common\Counter-Strike Global Offensive\";
     public static string SDA = @"D:\Game\SteamSDA\";
     public static readonly string ConfigBot = "-applaunch 730 -w 640 -h 480";
+    public static readonly string Width = "360";
+    public static readonly string Height = "270";
     public static readonly string ConfigGame = "-novid -console +fps_max 1";
     public static readonly string StartSteam = "-silent -vgui";
     public static readonly string ImgEconomy = "https://community.cloudflare.steamstatic.com/economy/image/";

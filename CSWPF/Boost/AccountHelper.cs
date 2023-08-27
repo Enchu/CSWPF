@@ -22,9 +22,9 @@ public class AccountHelper
     private static GameStateListener gsl;
     private static Regex pattern_login = new Regex("\\ LOGIN: (?<val>.*?)\\ ", RegexOptions.Compiled | RegexOptions.Singleline);
 
-    public static Account MoveAccount { get; set; } = (Account) null;
+    public static User MoveAccount { get; set; } = (User) null;
 
-    public static event EventHandler<Account> AccountStatusChanged;
+    public static event EventHandler<User> AccountStatusChanged;
 
     public static event EventHandler SwitchOffAutoButtons;
 
@@ -116,11 +116,11 @@ public class AccountHelper
       cyclesEnded((object) lobby, status);
     }
 
-    public static List<Tuple<Account, Process>> ActiveProcList { get; set; } = new List<Tuple<Account, Process>>();
+    public static List<Tuple<User, Process>> ActiveProcList { get; set; } = new List<Tuple<User, Process>>();
 
-    public static List<Tuple<Account, Process>> ActiveSteamList { get; set; } = new List<Tuple<Account, Process>>();
+    public static List<Tuple<User, Process>> ActiveSteamList { get; set; } = new List<Tuple<User, Process>>();
 
-    public static bool CheckExistsAndRunWithoutSandbox(Account account)
+    public static bool CheckExistsAndRunWithoutSandbox(User account)
     {
       string str1 = Options.G.StreamPath + "\\";
       string str2 = Options.G.CSGOPath + "\\";
@@ -185,14 +185,14 @@ public class AccountHelper
         {
           try
           {
-            List<Account> source = new List<Account>();
+            List<User> source = new List<User>();
             lock (LobbyDb.G)
             {
               foreach (Lobby lobby in (List<Lobby>) LobbyDb.G)
-                source.AddRange((IEnumerable<Account>) lobby.Accounts);
+                source.AddRange((IEnumerable<User>) Lobby.Users);
             }
-            List<Tuple<Account, Process>> tupleList1 = new List<Tuple<Account, Process>>();
-            List<Tuple<Account, Process>> tupleList2 = new List<Tuple<Account, Process>>();
+            List<Tuple<User, Process>> tupleList1 = new List<Tuple<User, Process>>();
+            List<Tuple<User, Process>> tupleList2 = new List<Tuple<User, Process>>();
             foreach (Process process in Process.GetProcesses())
             {
               string lower = process.ProcessName.ToLower();
@@ -203,37 +203,37 @@ public class AccountHelper
                   login = match.Groups[1].Value.ToLower();
                 if (!string.IsNullOrEmpty(login))
                 {
-                  Account account = source.FirstOrDefault<Account>((Func<Account, bool>) (o => o != null && o.IsUse && o.Login.ToLower().Equals(login)));
+                  User account = source.FirstOrDefault<User>((Func<User, bool>) (o => o != null && o.IsUse && o.Login.ToLower().Equals(login)));
                   if (account != null)
-                    tupleList1.Add(new Tuple<Account, Process>(account, process));
+                    tupleList1.Add(new Tuple<User, Process>(account, process));
                 }
               }
               if (lower.StartsWith("steam_"))
               {
-                long userid;
-                if (long.TryParse(lower.Replace("steam_", ""), out userid))
+                ulong userid;
+                if (ulong.TryParse(lower.Replace("steam_", ""), out userid))
                 {
-                  Account account = source.FirstOrDefault<Account>((Func<Account, bool>) (o => o.SID == userid));
+                  User account = source.FirstOrDefault<User>((Func<User, bool>) (o => o.SID == userid));
                   if (account != null)
-                    tupleList2.Add(new Tuple<Account, Process>(account, process));
+                    tupleList2.Add(new Tuple<User, Process>(account, process));
                 }
               }
             }
             lock (AccountHelper.ActiveProcList)
             {
               AccountHelper.ActiveProcList.Clear();
-              AccountHelper.ActiveProcList.AddRange((IEnumerable<Tuple<Account, Process>>) tupleList1);
+              AccountHelper.ActiveProcList.AddRange((IEnumerable<Tuple<User, Process>>) tupleList1);
             }
             lock (AccountHelper.ActiveSteamList)
             {
               AccountHelper.ActiveSteamList.Clear();
-              AccountHelper.ActiveSteamList.AddRange((IEnumerable<Tuple<Account, Process>>) tupleList2);
+              AccountHelper.ActiveSteamList.AddRange((IEnumerable<Tuple<User, Process>>) tupleList2);
             }
             for (int index = 0; index < source.Count; ++index)
             {
-              Account a = source[index];
+              User a = source[index];
               bool flag1 = false;
-              Tuple<Account, Process> tuple = tupleList1.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o != null && o.Item1 != null && o.Item1.Login.Equals(a.Login)));
+              Tuple<User, Process> tuple = tupleList1.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o != null && o.Item1 != null && o.Item1.Login.Equals(a.Login)));
               bool flag2 = tuple != null;
               try
               {
@@ -247,7 +247,7 @@ public class AccountHelper
                   a.IsStarted = false;
                   flag1 = true;
                 }
-                int num = tupleList2.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o != null && o.Item1 != null && o.Item1.Login.Equals(a.Login))) != null ? 1 : 0;
+                int num = tupleList2.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o != null && o.Item1 != null && o.Item1.Login.Equals(a.Login))) != null ? 1 : 0;
                 if (num != 0 && !a.IsStartedSteam)
                 {
                   a.IsStartedSteam = true;
@@ -286,7 +286,7 @@ public class AccountHelper
                 }
                 if (flag1)
                 {
-                  EventHandler<Account> accountStatusChanged = AccountHelper.AccountStatusChanged;
+                  EventHandler<User> accountStatusChanged = AccountHelper.AccountStatusChanged;
                   if (accountStatusChanged != null)
                     accountStatusChanged((object) null, a);
                 }
@@ -314,13 +314,13 @@ public class AccountHelper
     {
       try
       {
-        Account account = (Account) null;
+        User account = (User) null;
         Lobby lobby1 = (Lobby) null;
         lock (LobbyDb.G)
         {
           foreach (Lobby lobby2 in (List<Lobby>) LobbyDb.G)
           {
-            account = lobby2.Accounts.FirstOrDefault<Account>((Func<Account, bool>) (o => !string.IsNullOrEmpty(o.Steamid64) && o.Steamid64.Equals(gs.Player.SteamID)));
+            account = Lobby.Users.FirstOrDefault<User>((Func<User, bool>) (o => !string.IsNullOrEmpty(Convert.ToString(o.SteamID)) && o.SteamID.Equals(gs.Player.SteamID)));
             if (account != null)
             {
               lobby1 = lobby2;
@@ -336,21 +336,21 @@ public class AccountHelper
       }
     }
 
-    public static Process GetProcess(Account account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
+    public static Process GetProcess(User account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
-    public static Process GetProcess(AccountData account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.login)))?.Item2;
+    public static Process GetProcess(AccountData account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.login)))?.Item2;
 
-    public static Process GetProcessSteam(Account account) => AccountHelper.ActiveSteamList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
+    public static Process GetProcessSteam(User account) => AccountHelper.ActiveSteamList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
     public static int KillAll(Lobby lobby)
     {
       int num = 0;
       lock (AccountHelper.ActiveProcList)
       {
-        foreach (Account account1 in lobby.Accounts)
+        foreach (User account1 in Lobby.Users)
         {
-          Account account = account1;
-          if (AccountHelper.ActiveProcList.FirstOrDefault<Tuple<Account, Process>>((Func<Tuple<Account, Process>, bool>) (o => o.Item1.Login.Equals(account.Login))) != null)
+          User account = account1;
+          if (AccountHelper.ActiveProcList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.Login))) != null)
           {
             try
             {
@@ -366,7 +366,7 @@ public class AccountHelper
       return num;
     }
 
-    public static void OpenFolder(Account account)
+    public static void OpenFolder(User account)
     {
       string checkedPath = AccountHelper.GetCheckedPath(Options.G.CSGOPath);
       if (!System.IO.Directory.Exists(checkedPath))
@@ -374,7 +374,7 @@ public class AccountHelper
       AccountHelper.OpenFolder(checkedPath + "\\csgo_" + account.SID.ToString());
     }
 
-    public static void OpenUserDataCfg(Account account) => AccountHelper.OpenFolder(AccountHelper.GetCheckedPath(Options.G.StreamPath) + "\\userdata\\" + account.SID.ToString() + "\\730\\local\\cfg\\");
+    public static void OpenUserDataCfg(User account) => AccountHelper.OpenFolder(AccountHelper.GetCheckedPath(Options.G.StreamPath) + "\\userdata\\" + account.SID.ToString() + "\\730\\local\\cfg\\");
 
     public static void OpenFolder(string folder) => new Process()
     {
@@ -391,23 +391,23 @@ public class AccountHelper
       string checkedPath = AccountHelper.GetCheckedPath(Options.G.CSGOPath);
       if (!System.IO.Directory.Exists(checkedPath))
         throw new Exception("Не задан путь к папке CSGO или не установлен CSGO");
-      Account leader1 = lobby.Leader1;
-      Account leader2 = lobby.Leader2;
+      User leader1 = lobby.Leader1;
+      User leader2 = lobby.Leader2;
       AccountHelper.UpdateCFG(leader1);
-      long sid1 = leader1.SID;
+      ulong sid1 = leader1.SID;
       string login1 = leader1.Login;
       string str1 = checkedPath + "\\csgo_" + sid1.ToString();
       AccountHelper.lineChanger("\tgame\t\"@ ACCOUNT: " + sid1.ToString() + " | LOGIN: " + login1 + " | LEADER #1\"", str1 + "/gameinfo.txt", 3);
       AccountHelper.FixAutoexec(leader1);
       File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", str1 + "\\cfg\\gamestate_integration_boost.cfg", true);
       AccountHelper.UpdateCFG(leader2);
-      long sid2 = leader2.SID;
+      ulong sid2 = leader2.SID;
       string login2 = leader2.Login;
       string str2 = checkedPath + "\\csgo_" + sid2.ToString();
       AccountHelper.lineChanger("\tgame\t\"@ ACCOUNT: " + sid2.ToString() + " | LOGIN: " + login2 + " | LEADER #2\"", str2 + "/gameinfo.txt", 3);
       AccountHelper.FixAutoexec(leader2);
       File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", str2 + "\\cfg\\gamestate_integration_boost.cfg", true);
-      foreach (Account account in lobby.Accounts.Where<Account>((Func<Account, bool>) (o => o.IsUse && !o.IsLeader)))
+      foreach (User account in Lobby.Users.Where<User>((Func<User, bool>) (o => o.IsUse && !o.IsLeader)))
       {
         AccountHelper.UpdateCFG(account);
         File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", checkedPath + "\\csgo_" + account.SID.ToString() + "\\cfg\\gamestate_integration_boost.cfg", true);
@@ -422,12 +422,12 @@ public class AccountHelper
       return checkedPath;
     }
 
-    private static void FixAutoexec(Account account)
+    private static void FixAutoexec(User account)
     {
       string path = AccountHelper.GetCheckedPath(Options.G.CSGOPath) + "\\csgo_" + account.SID.ToString();
       if (!System.IO.Directory.Exists(path))
         throw new Exception("Не найдена папка \\csgo_" + account.SID.ToString() + " для аккаунта " + account.Login + "!");
-      AccountHelper.lineChanger(string.Format("mat_setvideomode {0} {1} 1", (object) account.Lobby.Width, (object) account.Lobby.Height), path + "/cfg/autoexec.cfg", 12);
+      AccountHelper.lineChanger(string.Format("mat_setvideomode {0} {1} 1", (object) Lobby.Width, (object) Lobby.Height), path + "/cfg/autoexec.cfg", 12);
       if (account.Lobby.Leader1 == account)
         AccountHelper.lineChanger("con_logfile log/1.log", path + "/cfg/autoexec.cfg", 15);
       else if (account.Lobby.Leader2 == account)
@@ -436,7 +436,7 @@ public class AccountHelper
         AccountHelper.lineChanger("//con_logfile log/0.log", path + "/cfg/autoexec.cfg", 15);
     }
 
-    public static void Start(Account account)
+    public static void Start(User account)
     {
       AccountHelper.CheckAccount(account);
       if (!System.IO.Directory.Exists(AccountHelper.GetCheckedPath(Options.G.CSGOPath) + "\\csgo_" + account.SID.ToString()))
@@ -447,7 +447,7 @@ public class AccountHelper
         string str1 = System.IO.Directory.GetCurrentDirectory() + "/launcher/Launcher.exe";
         string checkedPath = AccountHelper.GetCheckedPath(Options.G.StreamPath);
         string str2 = Options.G.IsHideLauncher ? "1" : "0";
-        string str3 = " \"" + account.Login + "\"" + (" \"" + account.Login + "\"") + (" \"" + account.Password + "\"") + (" \"" + account.Lobby.Parameters + "\"") + (" " + account.Steamid64) + string.Format(" {0}", (object) account.SID) + (" \"" + account.Lobby.Leader1.Login + "\"") + (" \"" + account.Lobby.Leader2.Login + "\"") + string.Format(" {0}", (object) account.X) + string.Format(" {0}", (object) account.Y) + " 640" + " 480" + (" " + str2) + (" \"" + checkedPath + "\"");
+        string str3 = " \"" + account.Login + "\"" + (" \"" + account.Login + "\"") + (" \"" + account.Password + "\"") + (" \"" + account.Lobby.Parameters + "\"") + (" " + account.SteamID) + string.Format(" {0}", (object) account.SID) + (" \"" + account.Lobby.Leader1.Login + "\"") + (" \"" + account.Lobby.Leader2.Login + "\"") + string.Format(" {0}", (object) account.X) + string.Format(" {0}", (object) account.Y) + " 640" + " 480" + (" " + str2) + (" \"" + checkedPath + "\"");
         new Process()
         {
           StartInfo = new ProcessStartInfo()
@@ -465,25 +465,21 @@ public class AccountHelper
       account.Lobby.StartWorkers();
     }
 
-    public static void Kill(Account account)
+    public static void Kill(User account)
     {
       try
       {
         AccountHelper.CheckAccountAndPipe(account);
         AccountHelper.Pipe(account.Login, "kill");
       }
-      catch
-      {
-      }
+      catch { }
       try
       {
         Process process = AccountHelper.GetProcess(account);
         if (process != null)
           process?.Kill();
       }
-      catch
-      {
-      }
+      catch { }
       try
       {
         Process processSteam = AccountHelper.GetProcessSteam(account);
@@ -491,42 +487,40 @@ public class AccountHelper
           return;
         processSteam.Kill();
       }
-      catch
-      {
-      }
+      catch { }
     }
 
-    public static void Restart(Account account)
+    public static void Restart(User account)
     {
       AccountHelper.CheckAccountAndPipe(account);
       AccountHelper.Pipe(account.Login, "restart");
     }
 
-    public static void Hide(Account account)
+    public static void Hide(User account)
     {
       AccountHelper.CheckAccountAndPipe(account);
       AccountHelper.Pipe(account.Login, "hide");
     }
 
-    public static void Show(Account account)
+    public static void Show(User account)
     {
       AccountHelper.CheckAccountAndPipe(account);
       AccountHelper.Pipe(account.Login, "show");
     }
 
-    public static void Quit(Account account)
+    public static void Quit(User account)
     {
       AccountHelper.CheckAccountAndPipe(account);
       AccountHelper.Pipe(account.Login, "quit");
     }
 
-    public static void SteamOpen(Account account)
+    public static void SteamOpen(User account)
     {
       AccountHelper.CheckAccountAndPipe(account);
       AccountHelper.Pipe(account.Login, "steam");
     }
 
-    public static void Clear(Account account)
+    public static void Clear(User account)
     {
       AccountHelper.CheckAccountAndPipe(account);
       AccountHelper.Pipe(account.Login, "clear");
@@ -596,7 +590,7 @@ public class AccountHelper
       }
     }
 
-    private static void CheckAccount(Account account)
+    private static void CheckAccount(User account)
     {
       if (account == null)
         throw new Exception("Не задан аккаунт! Обратитесь к разработчику");
@@ -608,14 +602,14 @@ public class AccountHelper
         throw new Exception("Не задано лобби для аккаунта " + account.Login + "! Обратитесь к разработчику");
     }
 
-    private static void CheckAccountAndPipe(Account account)
+    private static void CheckAccountAndPipe(User account)
     {
       AccountHelper.CheckAccount(account);
       if (!AccountHelper.IsNamedPipeExist(account.Login))
         throw new Exception("Сервер не запущен");
     }
 
-    public static void UpdateCFG(Account account)
+    public static void UpdateCFG(User account)
     {
       AccountHelper.CheckAccount(account);
       string lower = account.Login.ToLower();
@@ -664,15 +658,15 @@ public class AccountHelper
       }, StringSplitOptions.None);
       string str4 = Regex.Match(array[Array.IndexOf<string>(array, "\t\t\"AccountName\"\t\t\"" + lower + "\"") - 2], "\"([^\"]+)").Groups[1].Value;
       string s = !string.IsNullOrEmpty(str4) ? str4 : throw new Exception("Не удалось получить STEAMID64");
-      long result;
-      if (!long.TryParse(s, out result))
+      ulong result;
+      if (!ulong.TryParse(s, out result))
         throw new Exception("Не удалось получить STEAMID64");
       result -= 76561197960265728L;
       if (result == 0L)
         throw new Exception("Не удалось получить STEAMID64");
-      Account leader1 = account.Lobby.Leader1;
-      Account leader2 = account.Lobby.Leader2;
-      account.Steamid64 = s;
+      User leader1 = account.Lobby.Leader1;
+      User leader2 = account.Lobby.Leader2;
+      account.SteamID = (Convert.ToUInt64(s));
       account.SID = result;
       string str5 = path + "csgo_" + result.ToString();
       if (!File.Exists(str1 + "Steam_" + result.ToString() + ".exe"))

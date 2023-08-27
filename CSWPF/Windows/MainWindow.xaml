@@ -12,12 +12,12 @@
     <Grid Margin="5">
         
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="80"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         
         <Grid Grid.Row="0">
-            <StackPanel Name="PanelIcons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
+            <StackPanel Name="PanelIcons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,10,0">
                 
                 <Button Width="32" Height="32" Margin="5" Click="HomeClick" Style="{StaticResource ImageButtonStyle}" >
                     <Image Stretch="Uniform" Source="../Icons/home.png"/>
@@ -42,11 +42,19 @@
                 <Button Width="32" Height="32" Margin="5" Click="ToolClick"  Style="{StaticResource ImageButtonStyle}">
                     <Image Stretch="Uniform" Source="../Icons/wifi.ico"/>
                 </Button>
-                
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,0">
+                <Button Width="32" Height="32" Margin="5" Click="StartClick" Style="{StaticResource ImageButtonStyle}" >
+                    <Image Stretch="Uniform" Source="../Icons/start.png"/>
+                </Button>
+                <Button Width="32" Height="32" Margin="5" Click="KillClick" Style="{StaticResource ImageButtonStyle}" >
+                    <Image Stretch="Uniform" Source="../Icons/murder.png"/>
+                </Button>
             </StackPanel>
             
             <Button Visibility="Collapsed" Click="AddClick" Width="200" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0" Content="Добавить новый аккаунт"/>
-            <TextBox Name="Account" Width="200" Height="40"/>
+            <TextBox HorizontalAlignment="Center" VerticalAlignment="Top" Name="Account" Width="200" Height="40"/>
         </Grid>
         
         <Grid Grid.Row="1">

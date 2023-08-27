@@ -54,6 +54,10 @@
       <None Remove="Icons\irrigation.png" />
       <None Remove="Icons\steam.png" />
       <Resource Include="Icons\steam.png" />
+      <None Remove="Icons\start.png" />
+      <Resource Include="Icons\start.png" />
+      <None Remove="Icons\murder.png" />
+      <Resource Include="Icons\murder.png" />
     </ItemGroup>
 
     <ItemGroup>

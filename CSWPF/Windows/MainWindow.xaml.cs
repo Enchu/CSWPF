@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,9 +18,9 @@ using SteamAuth;
 using SteamKit2;
 using SteamKit2.Authentication;
 using SteamKit2.Internal;
+using static CSWPF.Helpers.HelperCS;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
-using Label = System.Windows.Controls.Label;
 using MessageBox = System.Windows.Forms.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 
@@ -34,7 +35,6 @@ namespace CSWPF.Windows
             {
                 User allUsers = JsonConvert.DeserializeObject<User>(File.ReadAllText(filename));
                 allUsers.CheckAccount();
-                allUsers.CheckSID();
                 _users.Add(allUsers);
             }
         }
@@ -46,7 +46,7 @@ namespace CSWPF.Windows
             _users.Clear();
         }
         
-        private void createButton(string iconsName ,MouseButtonEventHandler click, StackPanel stackPanel, string login)
+        private void createButton(string iconsName , RoutedEventHandler click, StackPanel stackPanel, string login)
         {
             Button button = new Button();
             Image image = new Image();
@@ -54,22 +54,10 @@ namespace CSWPF.Windows
             image.Source = new BitmapImage(new Uri($"pack://application:,,,/Icons/{iconsName}"));
             button.Content = image;
             button.Style = this.FindResource("ImageButtonStyle") as Style;
-            button.MouseUp += click;
+            button.Click += click;
             button.Tag = login;
 
             stackPanel.Children.Add(button);
-        }
-
-        private void createCheckBox(string content, StackPanel stackPanel)
-        {
-            CheckBox checkBox = new CheckBox();
-            checkBox.Margin = new Thickness(5);
-            checkBox.Content = content;
-            /*
-              checkBoxPrime.IsChecked = db.Prime;
-              checkBoxPrime.Checked += db.CheckPrime;
-             */
-            stackPanel.Children.Add(checkBox);
         }
 
         private void CreateChildren()
@@ -86,7 +74,7 @@ namespace CSWPF.Windows
                 PanelForLogin.Children.Add(login);
 
                 //password
-                createButton("screwdriver.png", db.ClickLogin, PanelForPassword, db.Login);
+                createButton("screwdriver.png", db.ClickPassword, PanelForPassword, db.Login);
 
                 //start
                 createButton("cow.png", db.ClickStart, stackPanel, db.Login);
@@ -95,11 +83,23 @@ namespace CSWPF.Windows
                 createButton("cloud-lightning.png", db.ClickKill, PanelForKill, db.Login);
 
                 //open Steam
-                createButton("steam.png", db.ClickOpenSteam, PanelForOpenSteam, db.Login);
+                //createButton("steam.png", db.ClickOpenSteam, PanelForOpenSteam, db.Login);
 
                 //checkbox
-                createCheckBox("F", stackPanel);
-                createCheckBox("Prime", stackPanel);
+                CheckBox checkBoxF = new CheckBox();
+                checkBoxF.Margin = new Thickness(5);
+                checkBoxF.Content = "F";
+                checkBoxF.Tag = db;
+                checkBoxF.MouseMove += SelectedMove;
+                stackPanel.Children.Add(checkBoxF);
+                
+                CheckBox checkBoxPrime = new CheckBox();
+                checkBoxPrime.Margin = new Thickness(5);
+                checkBoxPrime.Content = "Prime";
+                checkBoxPrime.IsChecked = db.Prime;
+                checkBoxPrime.Checked += db.CheckPrime;
+                stackPanel.Children.Add(checkBoxPrime);
+
 
                 //invent and trade
                 createButton("irrigation.png", db.ClickCheckInventory, stackPanel, db.Login);
@@ -108,6 +108,35 @@ namespace CSWPF.Windows
             }
             
             _users.Clear();
+        }
+
+        public void SelectedMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (e.RightButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                CheckBox checkBox = sender as CheckBox;
+                checkBox.IsChecked = !checkBox.IsChecked;
+            }
+        }
+
+        private IEnumerable<T> FindVisualChildren<T>(DependencyObject dependencyObject) where T : DependencyObject
+        {
+            if (dependencyObject != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dependencyObject); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(dependencyObject, i);
+                    if (child != null && child is T t)
+                    {
+                        yield return t;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         public SteamGuardAccount account;
@@ -281,9 +310,29 @@ namespace CSWPF.Windows
             MessageBox.Show("Mobile authenticator successfully linked. Please write down your revocation code: " + linker.LinkedAccount.RevocationCode);
             //Add new user
             User newUser = new User(LoginTextBox.Text, PasswordTextBox.Text);
-            HelperCS.SaveNew(newUser,linker.LinkedAccount.IdentitySecret ,linker.LinkedAccount.SharedSecret);
+            SaveNew(newUser,linker.LinkedAccount.IdentitySecret ,linker.LinkedAccount.SharedSecret);
         }
-        
+
+        private void StartClick(object sender, RoutedEventArgs e)
+        {
+            _users.Clear();
+
+            foreach (CheckBox checkBox in FindVisualChildren<CheckBox>(PanelForStart))
+            {
+                if (checkBox.IsChecked == true && checkBox.Tag is User user)
+                {
+                    _users.Add(user);
+                }
+            }
+            //ads
+            StartLive(_users);
+        }
+
+        private void KillClick(object sender, RoutedEventArgs e)
+        {
+            AccountHelper.KillAll();
+        }
+
         private void AddBtClick(object sender, RoutedEventArgs e)
         {
             if (Msg.ShowQuestion("Вы действительно хотите добавить?"))
@@ -292,7 +341,7 @@ namespace CSWPF.Windows
                 LoginTextBox.Clear();
                 PasswordTextBox.Clear();
                 
-                HelperCS.SaveToDB(newUser);
+                SaveToDB(newUser);
                 ClearAll();
                 Load();
                 
