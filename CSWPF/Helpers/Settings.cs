@@ -32,6 +32,7 @@ public class Settings
         string path = $"{SteamGamePath}csgo_{SID}";
         AccountHelper.lineChanger(string.Format("mat_setvideomode {0} {1} 1", (object) 360, (object) 270), path + "/cfg/autoexec.cfg", 12);
     }
+
     public static void ExchangeCfg(ulong result)
     {
         if (result == 0L)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using CSWPF.Boost.Models;
 using CSWPF.Directory.Models;
 #pragma warning disable SYSLIB0011
 

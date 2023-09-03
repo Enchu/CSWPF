@@ -119,25 +119,7 @@ namespace CSWPF.Windows
             }
         }
 
-        private IEnumerable<T> FindVisualChildren<T>(DependencyObject dependencyObject) where T : DependencyObject
-        {
-            if (dependencyObject != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dependencyObject); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(dependencyObject, i);
-                    if (child != null && child is T t)
-                    {
-                        yield return t;
-                    }
-
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
-            }
-        }
+        
 
         public SteamGuardAccount account;
         private async void AddSDA()
@@ -311,6 +293,26 @@ namespace CSWPF.Windows
             //Add new user
             User newUser = new User(LoginTextBox.Text, PasswordTextBox.Text);
             SaveNew(newUser,linker.LinkedAccount.IdentitySecret ,linker.LinkedAccount.SharedSecret);
+        }
+
+        private IEnumerable<T> FindVisualChildren<T>(DependencyObject dependencyObject) where T : DependencyObject
+        {
+            if (dependencyObject != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dependencyObject); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(dependencyObject, i);
+                    if (child != null && child is T t)
+                    {
+                        yield return t;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         private void StartClick(object sender, RoutedEventArgs e)

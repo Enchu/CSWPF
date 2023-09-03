@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows;
+using CSWPF.Boost.Models;
 
 namespace CSWPF.Directory;
 

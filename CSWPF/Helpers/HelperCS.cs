@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using CSWPF.Boost.Models;
 using CSWPF.Directory;
 using CSWPF.Directory.Assist;
 using CSWPF.Directory.Models;
@@ -92,7 +93,7 @@ public partial class HelperCS : System.Windows.Forms.Form
 
         if (flag)
         {
-            await Task.Delay(120000, App.Token);
+            await Task.Delay(12000, App.Token);
         }
 
         List<User> user1 = new List<User>();
@@ -108,7 +109,7 @@ public partial class HelperCS : System.Windows.Forms.Form
         user2.Add(user[7]);
         user2.Add(user[8]);
         user2.Add(user[9]);
-        
+
         await Lobby.AssemblyLobbies(user1, user2);
     }
 

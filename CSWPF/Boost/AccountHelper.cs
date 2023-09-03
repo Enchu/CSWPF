@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using CSWPF.Boost.Models;
 using CSWPF.Directory.Assist;
 using CSWPF.Directory.Models;
 using CSWPF.Helpers;
@@ -338,43 +339,8 @@ public class AccountHelper
 
     public static Process GetProcess(User account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
-    public static Process GetProcess(AccountData account) => AccountHelper.ActiveProcList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.login)))?.Item2;
-
     public static Process GetProcessSteam(User account) => AccountHelper.ActiveSteamList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.Login)))?.Item2;
 
-    public static int KillAll(Lobby lobby)
-    {
-      int num = 0;
-      lock (AccountHelper.ActiveProcList)
-      {
-        foreach (User account1 in Lobby.Users)
-        {
-          User account = account1;
-          if (AccountHelper.ActiveProcList.FirstOrDefault<Tuple<User, Process>>((Func<Tuple<User, Process>, bool>) (o => o.Item1.Login.Equals(account.Login))) != null)
-          {
-            try
-            {
-              AccountHelper.Kill(account);
-              ++num;
-            }
-            catch
-            {
-            }
-          }
-        }
-      }
-      return num;
-    }
-
-    public static void OpenFolder(User account)
-    {
-      string checkedPath = AccountHelper.GetCheckedPath(Options.G.CSGOPath);
-      if (!System.IO.Directory.Exists(checkedPath))
-        throw new Exception("Не задан путь к папке CSGO или не установлен CSGO");
-      AccountHelper.OpenFolder(checkedPath + "\\csgo_" + account.SID.ToString());
-    }
-
-    public static void OpenUserDataCfg(User account) => AccountHelper.OpenFolder(AccountHelper.GetCheckedPath(Options.G.StreamPath) + "\\userdata\\" + account.SID.ToString() + "\\730\\local\\cfg\\");
 
     public static void OpenFolder(string folder) => new Process()
     {
@@ -385,35 +351,6 @@ public class AccountHelper
       }
     }.Start();
 
-    public static void SetupLeaders(Lobby lobby)
-    {
-      Msg.ShowInfo(nameof (SetupLeaders));
-      string checkedPath = AccountHelper.GetCheckedPath(Options.G.CSGOPath);
-      if (!System.IO.Directory.Exists(checkedPath))
-        throw new Exception("Не задан путь к папке CSGO или не установлен CSGO");
-      User leader1 = lobby.Leader1;
-      User leader2 = lobby.Leader2;
-      AccountHelper.UpdateCFG(leader1);
-      ulong sid1 = leader1.SID;
-      string login1 = leader1.Login;
-      string str1 = checkedPath + "\\csgo_" + sid1.ToString();
-      AccountHelper.lineChanger("\tgame\t\"@ ACCOUNT: " + sid1.ToString() + " | LOGIN: " + login1 + " | LEADER #1\"", str1 + "/gameinfo.txt", 3);
-      AccountHelper.FixAutoexec(leader1);
-      File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", str1 + "\\cfg\\gamestate_integration_boost.cfg", true);
-      AccountHelper.UpdateCFG(leader2);
-      ulong sid2 = leader2.SID;
-      string login2 = leader2.Login;
-      string str2 = checkedPath + "\\csgo_" + sid2.ToString();
-      AccountHelper.lineChanger("\tgame\t\"@ ACCOUNT: " + sid2.ToString() + " | LOGIN: " + login2 + " | LEADER #2\"", str2 + "/gameinfo.txt", 3);
-      AccountHelper.FixAutoexec(leader2);
-      File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", str2 + "\\cfg\\gamestate_integration_boost.cfg", true);
-      foreach (User account in Lobby.Users.Where<User>((Func<User, bool>) (o => o.IsUse && !o.IsLeader)))
-      {
-        AccountHelper.UpdateCFG(account);
-        File.Copy(Environment.CurrentDirectory + "\\data\\gamestate_integration_boost.cfg", checkedPath + "\\csgo_" + account.SID.ToString() + "\\cfg\\gamestate_integration_boost.cfg", true);
-      }
-    }
-
     public static string GetCheckedPath(string path)
     {
       string checkedPath = path + "\\";
@@ -422,109 +359,8 @@ public class AccountHelper
       return checkedPath;
     }
 
-    private static void FixAutoexec(User account)
-    {
-      string path = AccountHelper.GetCheckedPath(Options.G.CSGOPath) + "\\csgo_" + account.SID.ToString();
-      if (!System.IO.Directory.Exists(path))
-        throw new Exception("Не найдена папка \\csgo_" + account.SID.ToString() + " для аккаунта " + account.Login + "!");
-      AccountHelper.lineChanger(string.Format("mat_setvideomode {0} {1} 1", (object) Lobby.Width, (object) Lobby.Height), path + "/cfg/autoexec.cfg", 12);
-      if (account.Lobby.Leader1 == account)
-        AccountHelper.lineChanger("con_logfile log/1.log", path + "/cfg/autoexec.cfg", 15);
-      else if (account.Lobby.Leader2 == account)
-        AccountHelper.lineChanger("con_logfile log/2.log", path + "/cfg/autoexec.cfg", 15);
-      else
-        AccountHelper.lineChanger("//con_logfile log/0.log", path + "/cfg/autoexec.cfg", 15);
-    }
 
-    public static void Start(User account)
-    {
-      AccountHelper.CheckAccount(account);
-      if (!System.IO.Directory.Exists(AccountHelper.GetCheckedPath(Options.G.CSGOPath) + "\\csgo_" + account.SID.ToString()))
-        throw new Exception("Не найдена папка \\csgo_" + account.SID.ToString() + " для аккаунта " + account.Login + "!");
-      AccountHelper.FixAutoexec(account);
-      if (!AccountHelper.IsNamedPipeExist(account.Login))
-      {
-        string str1 = System.IO.Directory.GetCurrentDirectory() + "/launcher/Launcher.exe";
-        string checkedPath = AccountHelper.GetCheckedPath(Options.G.StreamPath);
-        string str2 = Options.G.IsHideLauncher ? "1" : "0";
-        string str3 = " \"" + account.Login + "\"" + (" \"" + account.Login + "\"") + (" \"" + account.Password + "\"") + (" \"" + account.Lobby.Parameters + "\"") + (" " + account.SteamID) + string.Format(" {0}", (object) account.SID) + (" \"" + account.Lobby.Leader1.Login + "\"") + (" \"" + account.Lobby.Leader2.Login + "\"") + string.Format(" {0}", (object) account.X) + string.Format(" {0}", (object) account.Y) + " 640" + " 480" + (" " + str2) + (" \"" + checkedPath + "\"");
-        new Process()
-        {
-          StartInfo = new ProcessStartInfo()
-          {
-            FileName = str1,
-            Arguments = str3,
-            CreateNoWindow = true,
-            UseShellExecute = false
-          }
-        }.Start();
-      }
-      else
-        AccountHelper.Pipe(account.Login, "start");
-      account.WaitToClick1 = true;
-      account.Lobby.StartWorkers();
-    }
-
-    public static void Kill(User account)
-    {
-      try
-      {
-        AccountHelper.CheckAccountAndPipe(account);
-        AccountHelper.Pipe(account.Login, "kill");
-      }
-      catch { }
-      try
-      {
-        Process process = AccountHelper.GetProcess(account);
-        if (process != null)
-          process?.Kill();
-      }
-      catch { }
-      try
-      {
-        Process processSteam = AccountHelper.GetProcessSteam(account);
-        if (processSteam == null || processSteam == null)
-          return;
-        processSteam.Kill();
-      }
-      catch { }
-    }
-
-    public static void Restart(User account)
-    {
-      AccountHelper.CheckAccountAndPipe(account);
-      AccountHelper.Pipe(account.Login, "restart");
-    }
-
-    public static void Hide(User account)
-    {
-      AccountHelper.CheckAccountAndPipe(account);
-      AccountHelper.Pipe(account.Login, "hide");
-    }
-
-    public static void Show(User account)
-    {
-      AccountHelper.CheckAccountAndPipe(account);
-      AccountHelper.Pipe(account.Login, "show");
-    }
-
-    public static void Quit(User account)
-    {
-      AccountHelper.CheckAccountAndPipe(account);
-      AccountHelper.Pipe(account.Login, "quit");
-    }
-
-    public static void SteamOpen(User account)
-    {
-      AccountHelper.CheckAccountAndPipe(account);
-      AccountHelper.Pipe(account.Login, "steam");
-    }
-
-    public static void Clear(User account)
-    {
-      AccountHelper.CheckAccountAndPipe(account);
-      AccountHelper.Pipe(account.Login, "clear");
-    }
+    
 
     public static void KillAll()
     {
@@ -533,24 +369,18 @@ public class AccountHelper
         foreach (Process process in ((IEnumerable<Process>) Process.GetProcesses()).Where<Process>((Func<Process, bool>) (pr => pr.ProcessName.ToLower().Equals("csgo"))))
           process.Kill();
       }
-      catch (Exception ex)
-      {
-      }
+      catch (Exception ex){}
       try
       {
         ((IEnumerable<Process>) Process.GetProcesses()).Where<Process>((Func<Process, bool>) (x => x.ProcessName.ToLower().StartsWith("steam"))).ToList<Process>().ForEach((Action<Process>) (x => x.Kill()));
       }
-      catch (Exception ex)
-      {
-      }
+      catch (Exception ex){}
       try
       {
         foreach (Process process in ((IEnumerable<Process>) Process.GetProcesses()).Where<Process>((Func<Process, bool>) (pr => pr.ProcessName.ToLower().Equals("launcher"))))
           process.Kill();
       }
-      catch (Exception ex)
-      {
-      }
+      catch (Exception ex){}
     }
 
     public static void Pipe(string name, string command)
@@ -607,141 +437,6 @@ public class AccountHelper
       AccountHelper.CheckAccount(account);
       if (!AccountHelper.IsNamedPipeExist(account.Login))
         throw new Exception("Сервер не запущен");
-    }
-
-    public static void UpdateCFG(User account)
-    {
-      AccountHelper.CheckAccount(account);
-      string lower = account.Login.ToLower();
-      string password = account.Password;
-      string str1 = Options.G.StreamPath + "\\";
-      string path = Options.G.CSGOPath + "\\";
-      string str2 = str1 + "\\Steam.exe";
-      if (string.IsNullOrEmpty(str1))
-        throw new Exception("Укажите папку Steam");
-      if (string.IsNullOrEmpty(path))
-        throw new Exception("Укажите папку CSGO");
-      if (!File.Exists(str2))
-        throw new Exception("Не установлен Steam");
-      if (!System.IO.Directory.Exists(path))
-        throw new Exception("Не установлен CSGO");
-      string input = "";
-      string str3 = "";
-      using (FileStream fileStream = new FileStream(str1 + "\\config\\loginusers.vdf", FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
-      {
-        using (StreamReader streamReader = new StreamReader((Stream) fileStream))
-        {
-          input = streamReader.ReadToEnd();
-          str3 = Regex.Match(input, "AccountName\"\t\t\"" + lower + "([^\n]+)").Groups[0].Value;
-        }
-      }
-      if (string.IsNullOrEmpty(str3))
-      {
-        new Process()
-        {
-          StartInfo = new ProcessStartInfo()
-          {
-            WindowStyle = ProcessWindowStyle.Hidden,
-            WorkingDirectory = str1,
-            FileName = str2,
-            Arguments = ("-login " + lower)
-          }
-        }.Start();
-        Clipboard.SetText(password);
-        throw new Exception("Аккаунт не найден, авторизируйтесь перед тем как продолжить");
-      }
-      string[] array = input.Split(new string[3]
-      {
-        "\r\n",
-        "\r",
-        "\n"
-      }, StringSplitOptions.None);
-      string str4 = Regex.Match(array[Array.IndexOf<string>(array, "\t\t\"AccountName\"\t\t\"" + lower + "\"") - 2], "\"([^\"]+)").Groups[1].Value;
-      string s = !string.IsNullOrEmpty(str4) ? str4 : throw new Exception("Не удалось получить STEAMID64");
-      ulong result;
-      if (!ulong.TryParse(s, out result))
-        throw new Exception("Не удалось получить STEAMID64");
-      result -= 76561197960265728L;
-      if (result == 0L)
-        throw new Exception("Не удалось получить STEAMID64");
-      User leader1 = account.Lobby.Leader1;
-      User leader2 = account.Lobby.Leader2;
-      account.SteamID = (Convert.ToUInt64(s));
-      account.SID = result;
-      string str5 = path + "csgo_" + result.ToString();
-      if (!File.Exists(str1 + "Steam_" + result.ToString() + ".exe"))
-        File.Copy(str2, str1 + "Steam_" + result.ToString() + ".exe");
-      AccountHelper.copyDirectory("data/game/", path + "csgo_" + result.ToString());
-      if (leader1.Login.Equals(account.Login))
-        AccountHelper.lineChanger("\tgame\t\"@ LOGIN: " + account.Login + " | LEADER #1\"", str5 + "/gameinfo.txt", 3);
-      else if (leader2.Login.Equals(account.Login))
-        AccountHelper.lineChanger("\tgame\t\"@ LOGIN: " + account.Login + " | LEADER #2\"", str5 + "/gameinfo.txt", 3);
-      else
-        AccountHelper.lineChanger("\tgame\t\"@ LOGIN: " + account.Login + " | BOT\"", str5 + "/gameinfo.txt", 3);
-      if (!System.IO.Directory.Exists(str1 + "userdata\\" + result.ToString() + "\\"))
-        System.IO.Directory.CreateDirectory(str1 + "userdata\\" + result.ToString() + "\\");
-      if (!System.IO.Directory.Exists(str1 + "userdata\\" + result.ToString() + "\\730\\"))
-        System.IO.Directory.CreateDirectory(str1 + "userdata\\" + result.ToString() + "\\730\\");
-      if (!System.IO.Directory.Exists(str1 + "userdata\\" + result.ToString() + "\\730\\local\\"))
-        System.IO.Directory.CreateDirectory(str1 + "userdata\\" + result.ToString() + "\\730\\local\\");
-      if (!System.IO.Directory.Exists(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\"))
-        System.IO.Directory.CreateDirectory(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\");
-      int num = File.Exists(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg") ? 1 : 0;
-      bool flag1 = File.Exists(str1 + "userdata\\" + result.ToString() + "\\730/local\\cfg\\video.txt");
-      bool flag2 = File.Exists(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt");
-      if (num != 0)
-      {
-        if (!AccountHelper.IsFileReadOnly(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg"))
-        {
-          File.Copy("data/userdata/config.cfg", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg", true);
-        }
-        else
-        {
-          AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg", false);
-          File.Copy("data/userdata/config.cfg", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg", true);
-        }
-        AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg", true);
-      }
-      else
-      {
-        File.Copy("data/userdata/config.cfg", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg", true);
-        AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\config.cfg", true);
-      }
-      if (flag1)
-      {
-        if (!AccountHelper.IsFileReadOnly(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt"))
-        {
-          File.Copy("data/userdata/video.txt", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt", true);
-        }
-        else
-        {
-          AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt", false);
-          File.Copy("data/userdata/video.txt", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt", true);
-        }
-        AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt", true);
-      }
-      else
-      {
-        File.Copy("data/userdata/video.txt", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt", true);
-        AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\video.txt", true);
-      }
-      if (flag2)
-      {
-        if (!AccountHelper.IsFileReadOnly(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt"))
-        {
-          File.Copy("data/userdata/videodefaults.txt", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt", true);
-        }
-        else
-        {
-          AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt", false);
-          File.Copy("data/userdata/videodefaults.txt", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt", true);
-        }
-      }
-      else
-      {
-        File.Copy("data/userdata/videodefaults.txt", str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt", true);
-        AccountHelper.SetFileReadAccess(str1 + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt", true);
-      }
     }
 
     private static void copyDirectory(string strSource, string strDestination)
