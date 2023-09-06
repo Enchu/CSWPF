@@ -106,7 +106,8 @@ namespace CSWPF.Windows
 
                 PanelForStart.Children.Add(stackPanel);
             }
-            
+
+            Settings.CalculateWindowPositions(_users);
             _users.Clear();
         }
 
@@ -335,7 +336,12 @@ namespace CSWPF.Windows
             AccountHelper.KillAll();
         }
 
-        private void AddBtClick(object sender, RoutedEventArgs e)
+        private void TestClick(object sender, RoutedEventArgs e)
+        {
+            TestProces.GetProcess();
+        }
+
+            private void AddBtClick(object sender, RoutedEventArgs e)
         {
             if (Msg.ShowQuestion("Вы действительно хотите добавить?"))
             {

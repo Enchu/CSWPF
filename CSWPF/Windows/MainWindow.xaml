@@ -45,12 +45,19 @@
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,0">
+                
                 <Button Width="32" Height="32" Margin="5" Click="StartClick" Style="{StaticResource ImageButtonStyle}" >
                     <Image Stretch="Uniform" Source="../Icons/start.png"/>
                 </Button>
+                
                 <Button Width="32" Height="32" Margin="5" Click="KillClick" Style="{StaticResource ImageButtonStyle}" >
                     <Image Stretch="Uniform" Source="../Icons/murder.png"/>
                 </Button>
+                
+                <Button Width="32" Height="32" Margin="5" Click="TestClick" Style="{StaticResource ImageButtonStyle}" >
+                    <Image Stretch="Uniform" Source="../Icons/wifi.ico"/>
+                </Button>
+                
             </StackPanel>
             
             <Button Visibility="Collapsed" Click="AddClick" Width="200" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0" Content="Добавить новый аккаунт"/>

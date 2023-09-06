@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows;
-using CSWPF.Boost.Models;
 
 namespace CSWPF.Directory;
 
@@ -27,95 +26,6 @@ public class User
     [JsonProperty("prime")]
     public bool Prime { get; set; }
     public DateTime DateTime { get; set; } = DateTime.Now;
-
-    [DataMember(Name = "isuse")]
-    private bool _isUse = true;
-    private Lobby _lobby;
-    [NonSerialized]
-    private Stopwatch _timerAlive;
-    [NonSerialized]
-    private bool _isStarted;
-    [NonSerialized]
-    private bool _isStartedSteam;
-    [NonSerialized]
-    private bool _waitToClick1;
-    [DataMember(Name = "isleader")]
-    public bool IsLeader { get; set; }
-    public bool IsUse
-    {
-        get => this._isUse && !string.IsNullOrEmpty(this.Login);
-        set => this._isUse = value;
-    }
-    [DataMember(Name = "x")]
-    public int X { get; set; }
-
-    [DataMember(Name = "y")]
-    public int Y { get; set; }
-
-    [DataMember(Name = "w")]
-    public int W { get; set; }
-
-    [DataMember(Name = "h")]
-    public int H { get; set; }
-
-    [DataMember(Name = "info")]
-    public string Info { get; set; }
-
-    [DataMember(Name = "accountsecretcode")]
-    public string AccountSecretCode { get; set; }
-
-    [DataMember(Name = "guardcode")]
-    public string AccountSteamGuardCode { get; set; }
-
-    public Lobby Lobby
-    {
-        get => this._lobby;
-        set => this._lobby = value;
-    }
-
-    [DataMember(Name = "isstarted")]
-    public bool IsStarted
-    {
-        get => this._isStarted;
-        set
-        {
-            if (this._isStarted == value)
-                return;
-            this._isStarted = value;
-            if (this._isStarted)
-            {
-                if (this._timerAlive == null)
-                    this._timerAlive = new Stopwatch();
-                this._timerAlive.Restart();
-            }
-            else
-                this._timerAlive?.Stop();
-        }
-    }
-
-    [DataMember(Name = "isstartedstream")]
-    public bool IsStartedSteam
-    {
-        get => this._isStartedSteam;
-        set
-        {
-            if (this._isStartedSteam == value)
-                return;
-            this._isStartedSteam = value;
-        }
-    }
-
-    public int TimeAlive => this._timerAlive != null && this._timerAlive.IsRunning ? Convert.ToInt32(this._timerAlive.ElapsedMilliseconds) : 0;
-
-    public bool WaitToClick1
-    {
-        get => this._waitToClick1;
-        set => this._waitToClick1 = value;
-    }
-
-    public User(Lobby lobby) => this._lobby = lobby;
-
-    public int Index => Lobby.Users.IndexOf(this);
 
     public override string ToString() => this.Login;
 
@@ -140,7 +50,7 @@ public class User
 
     public void ClickStart(object sender, RoutedEventArgs e)
     {
-        HelperCS.Start(this);
+        HelperCS.Start(this, 0 , 0);
     }
 
     public void ClickOpenSteam(object sender, RoutedEventArgs e)

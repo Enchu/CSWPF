@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using CSWPF.Boost.Models;
 using CSWPF.Directory;
 using CSWPF.Directory.Assist;
 using CSWPF.Directory.Models;
@@ -56,19 +55,19 @@ public partial class HelperCS : System.Windows.Forms.Form
         File.WriteAllText(System.IO.Directory.GetCurrentDirectory()+ @"\Account\" + allUsers.Login + ".json", JsonConvert.SerializeObject(allUsers));
     }
     
-    public static void Start(User user)
+    public static void Start(User user, int x, int y)
     {
         ulong result = user.SteamID;
         result -= 76561197960265728L;
         //Settings
-        Settings.ExchangeCfg(result);
+        Settings.ExchangeCfg(result, user.Login);
         Settings.FixAutoexec(result);
         //Start
         if (!File.Exists($"{Settings.SteamPath}steam_{user.SID}.exe"))
             File.Copy($"{Settings.SteamFullPath}", $"{Settings.SteamPath}steam_{user.SID}.exe");
 
         string steamPath = System.IO.Directory.GetCurrentDirectory() + "/Launcher/Launcher.exe";
-        string Parametr = $" \"{user.Login}\" \"{user.Password}\" \"{Settings.ConfigGame}\" \"{user.SID}\" \"{user.X}\" \"{user.Y}\" \"{Settings.Width}\" \"{Settings.Height}\"";//\"{Settings.SteamPath}\"
+        string Parametr = $" \"{user.Login}\" \"{user.Password}\" \"{Settings.ConfigGame}\" \"{user.SID}\" \"{x}\" \"{y}\" \"{Settings.Width}\" \"{Settings.Height}\"";//\"{Settings.SteamPath}\"
         new Process()
         {
             StartInfo = new ProcessStartInfo()
@@ -83,34 +82,29 @@ public partial class HelperCS : System.Windows.Forms.Form
 
     public static async void StartLive(List<User> user)
     {
-        bool flag = false;
         foreach (var _user in user)
         {
-            Start(_user);
-            await Task.Delay(2000, App.Token);
-            flag = true;
+            (int x, int y) windowXY = Settings.SetupXY(_user);
+            Start(_user, windowXY.x, windowXY.y);
+            
+            Process process = AccountHelper.GetProcessNot();
+            while(process == null) { 
+                await Task.Delay(1000);
+                process = AccountHelper.GetProcessNot();
+            }
+
+            await LobbyASD.SetupLobby(_user);
+
+            Process processCS = AccountHelper.GetProcessCS(_user.Login);
+            while (processCS == null)
+            {
+                await Task.Delay(3000);
+                processCS = AccountHelper.GetProcessCS(_user.Login);
+            }
+
         }
 
-        if (flag)
-        {
-            await Task.Delay(12000, App.Token);
-        }
-
-        List<User> user1 = new List<User>();
-        user1.Add(user[0]);
-        user1.Add(user[1]);
-        user1.Add(user[2]);
-        user1.Add(user[3]);
-        user1.Add(user[4]);
-        
-        List<User> user2 = new List<User>();
-        user2.Add(user[5]);
-        user2.Add(user[6]);
-        user2.Add(user[7]);
-        user2.Add(user[8]);
-        user2.Add(user[9]);
-
-        await Lobby.AssemblyLobbies(user1, user2);
+        //await LobbyASD.AssemblyLobby(user);
     }
 
 }

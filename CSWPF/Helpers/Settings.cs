@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.VisualBasic.ApplicationServices;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using CSWPF.Directory;
+using User = CSWPF.Directory.User;
 
 namespace CSWPF.Helpers;
 
@@ -15,8 +17,8 @@ public class Settings
     public static string SteamGamePath = @"D:\Steam\steamapps\common\Counter-Strike Global Offensive\";
     public static string SDA = @"D:\Game\SteamSDA\";
     public static readonly string ConfigBot = "-applaunch 730 -w 640 -h 480";
-    public static readonly string Width = "360";
-    public static readonly string Height = "270";
+    public static readonly int Width = 360;
+    public static readonly int Height = 270;
     public static readonly string ConfigGame = "-novid -console +fps_max 1";
     public static readonly string StartSteam = "-silent -vgui";
     public static readonly string ImgEconomy = "https://community.cloudflare.steamstatic.com/economy/image/";
@@ -30,14 +32,21 @@ public class Settings
     public static void FixAutoexec(ulong SID)
     {
         string path = $"{SteamGamePath}csgo_{SID}";
-        AccountHelper.lineChanger(string.Format("mat_setvideomode {0} {1} 1", (object) 360, (object) 270), path + "/cfg/autoexec.cfg", 12);
+        AccountHelper.lineChanger(string.Format("mat_setvideomode {0} {1} 1", (object) Width, (object) Height), path + "/cfg/autoexec.cfg", 10);
     }
 
-    public static void ExchangeCfg(ulong result)
+    public static void ExchangeCfg(ulong result, string login)
     {
         if (result == 0L)
-        throw new Exception("Не удалось получить STEAMID64");
-
+        {
+            throw new Exception("Не удалось получить STEAMID64");
+        }
+        
+        //update cfg
+        string str5 = SteamGamePath + "csgo_" + result.ToString();
+        copyDirectory("data/game", str5);
+        lineChanger("\tgame\t\"" + login + "\"", str5 + "/gameinfo.txt", 3);
+        
       if (!System.IO.Directory.Exists(SteamPath + "userdata\\" + result.ToString() + "\\"))
             System.IO.Directory.CreateDirectory(SteamPath + "userdata\\" + result.ToString() + "\\");
       if (!System.IO.Directory.Exists(SteamPath + "userdata\\" + result.ToString() + "\\730\\"))
@@ -120,5 +129,38 @@ public class Settings
             file.CopyTo(Path.Combine(strDestination, file.Name), true);
         foreach (DirectoryInfo directory in directoryInfo.GetDirectories())
             copyDirectory(Path.Combine(strSource, directory.Name), Path.Combine(strDestination, directory.Name));
+    }
+
+    private static Dictionary<User, (int x, int y)> windowPositions = new Dictionary<User, (int x, int y)>();
+    public static void CalculateWindowPositions(List<User> users)
+    {
+        int windowsPerRow = 5;
+        int currentRow = 0;
+        int currentColumn = 0;
+        foreach (var user in users)
+        {
+            int x = currentColumn * Width;
+            int y = currentRow * Height;
+
+            windowPositions[user] = (x, y);
+
+            currentColumn++;
+
+            if (currentColumn >= windowsPerRow)
+            {
+                currentColumn = 0;
+                currentRow++;
+            }
+        }
+    }
+    
+    public static (int x, int y) SetupXY(User user)
+    {
+        if (windowPositions.ContainsKey(user))
+        {
+            return windowPositions[user];
+        }
+        
+        return (0, 0);
     }
 }
