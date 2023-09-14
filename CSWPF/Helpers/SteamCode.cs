@@ -22,6 +22,7 @@ public static class SteamCode
         string code = await TwoFactory.GenerateSteamGuardCode(TwoFactory.GetSteamTime(), user.SharedSecret);
         await Task.Delay(defaulttime);
         await LobbyASD.SetForeground();
+        await Task.Delay(1000);
         await LobbyASD.ClickToAccount(838, 498, 500);
         WinApi.SendString(code);
     }

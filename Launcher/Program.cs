@@ -153,7 +153,7 @@ public class Program
                 RedirectStandardError = true,
                 WorkingDirectory = steamPath,
                 FileName = path,
-                Arguments = " -login " + loginValue + " " + passwordValue + " -nochatui -nofriendsui -silent"
+                Arguments = "-nochatui -nofriendsui -silent"
             };
             Process process1 = new Process()
             {

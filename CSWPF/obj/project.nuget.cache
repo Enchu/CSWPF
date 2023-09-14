@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "BJOyuqrqlBV1bRBoTm0lyiPge3qIZwG3gXEfHxCo4s/g5ljiGGR59BrfAinsNRQbgZEytwPz/wvdVV2VrvxwBw==",
+  "dgSpecHash": "9jTVx4MKFMcXrNl3XX6NAR7IREu5llB5Db1a6WgU+Ybt9SrG4UjmLd4pOWdr/dBHCj21s63ArNNf4sBMHiWhOg==",
   "success": true,
   "projectFilePath": "D:\\RABITA\\Rider\\CSWPF\\CSWPF\\CSWPF.csproj",
   "expectedPackageFiles": [
@@ -73,6 +73,8 @@
     "C:\\Users\\aleck\\.nuget\\packages\\microsoft.data.sqlclient.sni.runtime\\5.1.0\\microsoft.data.sqlclient.sni.runtime.5.1.0.nupkg.sha512",
     "C:\\Users\\aleck\\.nuget\\packages\\microsoft.data.sqlite\\7.0.3\\microsoft.data.sqlite.7.0.3.nupkg.sha512",
     "C:\\Users\\aleck\\.nuget\\packages\\microsoft.data.sqlite.core\\7.0.3\\microsoft.data.sqlite.core.7.0.3.nupkg.sha512",
+    "C:\\Users\\aleck\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.0-preview.7.23375.6\\microsoft.extensions.dependencyinjection.8.0.0-preview.7.23375.6.nupkg.sha512",
+    "C:\\Users\\aleck\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0-preview.7.23375.6\\microsoft.extensions.dependencyinjection.abstractions.8.0.0-preview.7.23375.6.nupkg.sha512",
     "C:\\Users\\aleck\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
     "C:\\Users\\aleck\\.nuget\\packages\\microsoft.identity.client\\4.47.2\\microsoft.identity.client.4.47.2.nupkg.sha512",
     "C:\\Users\\aleck\\.nuget\\packages\\microsoft.identity.client.extensions.msal\\2.19.3\\microsoft.identity.client.extensions.msal.2.19.3.nupkg.sha512",

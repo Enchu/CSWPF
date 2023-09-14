@@ -19,10 +19,11 @@ public class Settings
     public static readonly string ConfigBot = "-applaunch 730 -w 640 -h 480";
     public static readonly int Width = 360;
     public static readonly int Height = 270;
-    public static readonly string ConfigGame = "-novid -console +fps_max 1";
+    public static readonly string ConfigGame = "-novid +fps_max 1";//-console
     public static readonly string StartSteam = "-silent -vgui";
     public static readonly string ImgEconomy = "https://community.cloudflare.steamstatic.com/economy/image/";
     public static readonly string TokenID = "_TOKyI1G";
+    public static readonly string Hosts = @"C:\Windows\System32\drivers\etc\hosts";
     public static readonly int X = 0;
     public static readonly int Y = 0;
     private static void SetFileReadAccess(string FileName, bool SetReadOnly) => new FileInfo(FileName).IsReadOnly = SetReadOnly;
@@ -113,8 +114,8 @@ public class Settings
           SetFileReadAccess(SteamPath + "userdata\\" + result.ToString() + "\\730\\local\\cfg\\videodefaults.txt", true);
       }
     }
-    
-    private static void lineChanger(string newText, string fileName, int line_to_edit)
+
+    public static void lineChanger(string newText, string fileName, int line_to_edit)
     {
         string[] contents = File.ReadAllLines(fileName);
         contents[line_to_edit - 1] = newText;
@@ -137,11 +138,17 @@ public class Settings
         int windowsPerRow = 5;
         int currentRow = 0;
         int currentColumn = 0;
+        int bottomMargin = 25;
         foreach (var user in users)
         {
             int x = currentColumn * Width;
             int y = currentRow * Height;
 
+            if (currentRow >= windowsPerRow)
+            {
+                y += bottomMargin;
+            }
+            
             windowPositions[user] = (x, y);
 
             currentColumn++;

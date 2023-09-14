@@ -1,0 +1,111 @@
+﻿<Window x:Class="CSWPF.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:viewModel = "clr-namespace:CSWPF.MVVM.ViewModel"
+        mc:Ignorable="d"
+        Title="" 
+        Height="600" Width="900"
+        FontFamily="Tahoma"
+        FontSize="16"
+        WindowStartupLocation="CenterScreen" Background="Transparent">
+
+
+    <Border Background="#272537" CornerRadius="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="75"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Text="Enchu" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="22" Margin="20,0,0,0"/>
+            
+            <StackPanel Grid.Row="1" Grid.Column="0">
+                <RadioButton 
+                    Content="Home" 
+                    Height="50" 
+                    Foreground="White" 
+                    FontSize="14" 
+                    Style="{StaticResource MenuButtonTheme}" 
+                    IsChecked="True" 
+                    Command="{Binding NavigateToHomeCommand}"/>
+                
+                <RadioButton 
+                    Content="Adding Users" 
+                    Height="50" 
+                    Foreground="White" 
+                    FontSize="14" 
+                    Style="{StaticResource MenuButtonTheme}"
+                    Command="{Binding NavigateToAddViewCommand}"/>
+
+                <RadioButton 
+                    Content="Setting" 
+                    Height="50" 
+                    Foreground="White" 
+                    FontSize="14" 
+                    Style="{StaticResource MenuButtonTheme}"
+                    Command="{Binding NavigateToSettingsViewCommand}"/>
+            </StackPanel>
+            
+            <Grid Grid.Row="0" Grid.Column="1">
+                <StackPanel Name="PanelIcons" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,10,0">
+                    
+                    <Button Width="32" Height="32" Margin="5" Style="{StaticResource ImageButtonStyle}" >
+                        <Image Stretch="Uniform" Source="./../../Icons/home.png"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Style="{StaticResource ImageButtonStyle}" >
+                        <Image Stretch="Uniform" Source="./../../Icons/plus.png"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Style="{StaticResource ImageButtonStyle}">
+                        <Image Stretch="Uniform" Source="./../../Icons/gear.png"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Click="SDAClick" Style="{StaticResource ImageButtonStyle}">
+                        <Image Stretch="Uniform" Source="./../../Icons/sda.png"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Click="MEMClick" Style="{StaticResource ImageButtonStyle}">
+                        <Image Stretch="Uniform" Source="./../../Icons/mem.ico"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Click="ToolClick" Style="{StaticResource ImageButtonStyle}">
+                        <Image Stretch="Uniform" Source="./../../Icons/wifi.ico"/>
+                    </Button>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,10,0">
+                    
+                    <Button Width="32" Height="32" Margin="5" Click="StartClick" Style="{StaticResource ImageButtonStyle}" >
+                        <Image Stretch="Uniform" Source="./../../Icons/start.png"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Click="KillClick" Style="{StaticResource ImageButtonStyle}" >
+                        <Image Stretch="Uniform" Source="./../../Icons/murder.png"/>
+                    </Button>
+                    
+                    <Button Width="32" Height="32" Margin="5" Click="TestClick" Style="{StaticResource ImageButtonStyle}" >
+                        <Image Stretch="Uniform" Source="./../../Icons/wifi.ico"/>
+                    </Button>
+                    
+                </StackPanel>
+                
+                <Button Visibility="Collapsed" Width="200" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0" Content="Добавить новый аккаунт"/>
+            </Grid>
+            
+            <StackPanel Grid.Row="1" Grid.Column="1" Name="PanelControl">
+                <ContentControl Margin="10" Name="contentControl" Content="{Binding Navigation.CurrentView}"/>
+            </StackPanel>
+            
+        
+        </Grid>
+    </Border>
+</Window>

@@ -15,7 +15,6 @@ public class LobbyASD
     public static async Task SetupLobby(User users)
     {
         await CopyLogAndPasToClipboard(users.Login, users.Password);
-        await Task.Delay(3000);
         await SteamCode.SteamCodeEnter(users);
     }
 
@@ -107,7 +106,7 @@ public class LobbyASD
       
         await ClickToAccount(660, 551, 300);
         WinApi.SendString(password);
-        await Task.Delay(500);
+        await Task.Delay(1000);
       
         await ClickToAccount(842, 633, 300);
         await Task.Delay(1000);
