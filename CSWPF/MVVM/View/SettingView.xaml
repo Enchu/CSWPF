@@ -7,9 +7,9 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" Background="#1B1B1B">
     <Grid>
-        <StackPanel Grid.Row="1" Name="PanelForSettings" Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+        <StackPanel Name="PanelForSettings" Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
             <Button Width="32" Height="32" Margin="5" Click="TBSteamPathClick" Style="{StaticResource ImageButtonStyle}" >
-                <Image Stretch="Uniform" Source="../Icons/steam.png"/>
+                <Image Stretch="Uniform" Source="../../Icons/steam.png"/>
             </Button>
         </StackPanel>
     </Grid>

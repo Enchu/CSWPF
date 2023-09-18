@@ -17,8 +17,7 @@ using Confirmation = CSWPF.Steam.Security.Confirmation;
 
 namespace CSWPF.Helpers;
 
-public partial class HelperCS : System.Windows.Forms.Form
-{
+public partial class HelperCS {
     public static void SaveNew(User user, string steamid, string sharedSecret)
     {
         User allUsers = new User(user.Login, user.Password);

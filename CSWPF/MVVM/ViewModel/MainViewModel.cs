@@ -1,35 +1,34 @@
-﻿using CSWPF.Core;
+﻿using System.Windows.Input;
+using CSWPF.Core;
 using CSWPF.MVVM.Model.Interface;
 using CSWPF.MVVM.View;
-using CSWPF.Services;
+
 
 namespace CSWPF.MVVM.ViewModel;
 
-public class MainViewModel: Core.ViewModel
+public class MainViewModel: ObservableObject
 {
-    private IUserService _userService;
-
-    public INavigationService _navigation;
-    public INavigationService Navigation
+    private object _currentView;
+    public object CurrentView
     {
-        get => _navigation;
-        set
-        {
-            _navigation = value;
-            OnPropertyChanged();
-        } 
+        get { return _currentView; }
+        set { _currentView = value; OnPropertyChanged(); }
     }
-
-    public RelayCommand NavigateToHomeCommand { get; set; }
-    public RelayCommand NavigateToSettingsViewCommand { get; set; }
-    public RelayCommand NavigateToAddViewCommand { get; set; }
     
-    public MainViewModel(INavigationService navigationService)
-    {
-        Navigation = navigationService;
+    public ICommand HomeCommand { get; set; }
+    public ICommand AddCommand { get; set; }
+    public ICommand SettingCommand { get; set; }
 
-        NavigateToHomeCommand = new RelayCommand(o => { Navigation.NavigateTo<HomeViewModel>(); },  o => true);
-        NavigateToSettingsViewCommand = new RelayCommand(o => { Navigation.NavigateTo<SettingViewModel>(); },  o => true);
-        NavigateToAddViewCommand = new RelayCommand(o => { Navigation.NavigateTo<AddViewModel>(); },  o => true);
+    private void Home(object obj) => CurrentView = new HomeView();
+    private void Add(object obj) => CurrentView = new AddingUsersView();
+    private void Setting(object obj) => CurrentView = new SettingView();
+
+    public MainViewModel()
+    {
+        CurrentView = new HomeViewModel();
+
+        HomeCommand = new RelayCommand(Home);
+        AddCommand = new RelayCommand(Add);
+        SettingCommand = new RelayCommand(Setting);
     }
 }

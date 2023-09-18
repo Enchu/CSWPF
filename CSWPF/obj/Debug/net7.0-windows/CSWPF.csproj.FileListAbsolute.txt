@@ -380,10 +380,7 @@ D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\Theme\MenuButtonTheme.baml
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\Theme\PasswordboxTheme.baml
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\Theme\StatusBarTheme.baml
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\Theme\TextboxTheme.baml
-D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\HomeView.g.cs
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\SettingView.g.cs
-D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\GeneratedInternalTypeHelper.g.cs
-D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\HomeView.baml
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\SettingView.baml
 D:\RABITA\Rider\CSWPF\CSWPF\bin\Debug\net7.0-windows\Microsoft.Extensions.DependencyInjection.dll
 D:\RABITA\Rider\CSWPF\CSWPF\bin\Debug\net7.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll
@@ -393,3 +390,6 @@ D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\InputForm.g.cs
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\MainWindow.g.cs
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\InputForm.baml
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\MainWindow.baml
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\HomeView.g.cs
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\GeneratedInternalTypeHelper.g.cs
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\HomeView.baml

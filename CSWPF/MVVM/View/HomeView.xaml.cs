@@ -1,31 +1,24 @@
-﻿using CSWPF.Core;
-using CSWPF.Directory;
-using CSWPF.Helpers;
-using CSWPF.MVVM.Model;
-using CSWPF.MVVM.Model.Interface;
-using CSWPF.MVVM.ViewModel;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CSWPF.Directory;
+using CSWPF.Helpers;
+using Newtonsoft.Json;
 
 namespace CSWPF.MVVM.View;
 
 public partial class HomeView : UserControl
 {
-    private List<User> _users = new List<User>();
-
+    private static List<User> _users = new();
     public HomeView()
     {
         InitializeComponent();
-
         Load();
     }
-
     private void Load()
     {
         Check();
@@ -112,6 +105,6 @@ public partial class HomeView : UserControl
         }
 
         Settings.CalculateWindowPositions(_users);
-        //_users.Clear();
+        _users.Clear();
     }
 }

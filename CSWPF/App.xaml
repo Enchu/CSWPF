@@ -7,6 +7,7 @@
     <Application.Resources>
         
         <ResourceDictionary>
+            
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Theme/MenuButtonTheme.xaml"/>
                 <ResourceDictionary Source="Theme/ImageButtonTheme.xaml"/>
@@ -18,18 +19,18 @@
                 <ResourceDictionary Source="Theme/LabelTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
-            <DataTemplate DataType="{x:Type  TypeName=viewModel:HomeViewModel}">
-               <view:HomeView/>
+            <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
+                <view:HomeView/>
             </DataTemplate>
-            
-            <DataTemplate DataType="{x:Type TypeName=viewModel:AddViewModel}">
+             
+            <DataTemplate DataType="{x:Type viewModel:AddViewModel}">
                 <view:AddingUsersView/>
             </DataTemplate>
-
-            <DataTemplate DataType="{x:Type TypeName=viewModel:SettingViewModel}">
+        
+            <DataTemplate DataType="{x:Type viewModel:SettingViewModel}">
                 <view:SettingView/>
             </DataTemplate>
-
+            
         </ResourceDictionary>
         
     </Application.Resources>

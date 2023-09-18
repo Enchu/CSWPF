@@ -138,7 +138,7 @@ public class Settings
         int windowsPerRow = 5;
         int currentRow = 0;
         int currentColumn = 0;
-        int bottomMargin = 25;
+        int bottomMargin = 30;
         foreach (var user in users)
         {
             int x = currentColumn * Width;

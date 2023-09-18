@@ -80,11 +80,12 @@ public class LobbyASD
     {
         for (int i = 0; i < 3; ++i)
         {
-            int cx;
-            int cy;
             MoveToAccount( x, y);
             if (timeBetweenPosAndClick > 0)
                 await Task.Delay(timeBetweenPosAndClick);
+            WinApi.POINT lpPoint;
+            if (WinApi.GetCursorPos(out lpPoint) || Math.Abs(lpPoint.X - x) < 3 && Math.Abs(lpPoint.Y - y) < 3)
+                break;
         }
         WinApi.mouse_event(2U, 0U, 0U, 0U, 0U);
         await Task.Delay(timeOfClick);
@@ -99,12 +100,14 @@ public class LobbyASD
     private static async Task CopyLogAndPasToClipboard(string login, string password)
     {
         await SetForeground();
-      
+        
         await ClickToAccount(660, 474, 500);
+        await Task.Delay(500);
         WinApi.SendString(login);
         await Task.Delay(500);
       
         await ClickToAccount(660, 551, 300);
+        await Task.Delay(500);
         WinApi.SendString(password);
         await Task.Delay(1000);
       

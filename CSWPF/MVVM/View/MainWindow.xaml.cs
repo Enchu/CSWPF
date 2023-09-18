@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,12 +34,13 @@ namespace CSWPF.Windows
 {
     public partial class MainWindow
     {
-        //Settings.lineChanger("#0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
         private static List<User> _users = new();
 
         public MainWindow()
         {
             InitializeComponent();
+            
+            Settings.lineChanger("#0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
         }
 
         private IEnumerable<T> FindVisualChildren<T>(DependencyObject dependencyObject) where T : DependencyObject
@@ -65,7 +67,7 @@ namespace CSWPF.Windows
         {
             _users.Clear();
 
-            foreach (CheckBox checkBox in FindVisualChildren<CheckBox>(PanelControl))
+            foreach (CheckBox checkBox in FindVisualChildren<CheckBox>(PanelCurrentView))
             {
                 if (checkBox.IsChecked == true && checkBox.Tag is User user)
                 {
@@ -79,6 +81,7 @@ namespace CSWPF.Windows
         private void KillClick(object sender, RoutedEventArgs e)
         {
             AccountHelper.KillAll();
+            Settings.lineChanger("0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
         }
 
         private void TestClick(object sender, RoutedEventArgs e)

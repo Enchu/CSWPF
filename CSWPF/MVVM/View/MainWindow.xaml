@@ -12,7 +12,10 @@
         FontSize="16"
         WindowStartupLocation="CenterScreen" Background="Transparent">
 
-
+    <Window.DataContext>
+        <viewModel:MainViewModel/>
+    </Window.DataContext>
+    
     <Border Background="#272537" CornerRadius="20">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -35,7 +38,7 @@
                     FontSize="14" 
                     Style="{StaticResource MenuButtonTheme}" 
                     IsChecked="True" 
-                    Command="{Binding NavigateToHomeCommand}"/>
+                    Command="{Binding HomeCommand}"/>
                 
                 <RadioButton 
                     Content="Adding Users" 
@@ -43,7 +46,7 @@
                     Foreground="White" 
                     FontSize="14" 
                     Style="{StaticResource MenuButtonTheme}"
-                    Command="{Binding NavigateToAddViewCommand}"/>
+                    Command="{Binding AddCommand}"/>
 
                 <RadioButton 
                     Content="Setting" 
@@ -51,7 +54,7 @@
                     Foreground="White" 
                     FontSize="14" 
                     Style="{StaticResource MenuButtonTheme}"
-                    Command="{Binding NavigateToSettingsViewCommand}"/>
+                    Command="{Binding SettingCommand}"/>
             </StackPanel>
             
             <Grid Grid.Row="0" Grid.Column="1">
@@ -101,10 +104,9 @@
                 <Button Visibility="Collapsed" Width="200" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0" Content="Добавить новый аккаунт"/>
             </Grid>
             
-            <StackPanel Grid.Row="1" Grid.Column="1" Name="PanelControl">
-                <ContentControl Margin="10" Name="contentControl" Content="{Binding Navigation.CurrentView}"/>
+            <StackPanel Grid.Row="1" Grid.Column="1" Name="PanelCurrentView">
+                <ContentControl Margin="10" Content="{Binding CurrentView}"/>
             </StackPanel>
-            
         
         </Grid>
     </Border>
