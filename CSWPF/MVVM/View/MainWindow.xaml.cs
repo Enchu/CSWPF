@@ -40,34 +40,14 @@ namespace CSWPF.Windows
         {
             InitializeComponent();
             
-            Settings.lineChanger("#0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
-        }
-
-        private IEnumerable<T> FindVisualChildren<T>(DependencyObject dependencyObject) where T : DependencyObject
-        {
-            if (dependencyObject != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dependencyObject); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(dependencyObject, i);
-                    if (child != null && child is T t)
-                    {
-                        yield return t;
-                    }
-
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
-            }
+            Settings.lineChanger("0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
         }
 
         private void StartClick(object sender, RoutedEventArgs e)
         {
             _users.Clear();
 
-            foreach (CheckBox checkBox in FindVisualChildren<CheckBox>(PanelCurrentView))
+            foreach (CheckBox checkBox in Settings.FindVisualChildren<CheckBox>(PanelCurrentView))
             {
                 if (checkBox.IsChecked == true && checkBox.Tag is User user)
                 {
@@ -81,12 +61,11 @@ namespace CSWPF.Windows
         private void KillClick(object sender, RoutedEventArgs e)
         {
             AccountHelper.KillAll();
-            Settings.lineChanger("0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
         }
 
         private void TestClick(object sender, RoutedEventArgs e)
         {
-            TestProces.GetProcess();
+            //TestProces.GetProcess();
         }
 
         private void SDAClick(object sender, RoutedEventArgs e)
@@ -123,6 +102,10 @@ namespace CSWPF.Windows
                 MessageBox.Show("Не могу открыть программу ***.exe");
             }
         }
-        
+
+        private void ClosedAllWindow(object sender, EventArgs e)
+        {
+            Settings.lineChanger("#0.0.0.0 store.steampowered.com", Settings.Hosts, 25);
+        }
     }
 }

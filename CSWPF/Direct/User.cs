@@ -27,8 +27,6 @@ public class User
     public bool Prime { get; set; }
     public DateTime DateTime { get; set; } = DateTime.Now;
 
-    public override string ToString() => this.Login;
-
     public User(string login, string password)
     {
         Login = login;
@@ -51,6 +49,11 @@ public class User
     public void ClickStart(object sender, RoutedEventArgs e)
     {
         HelperCS.Start(this, 0 , 0);
+    }
+    
+    public void CsClick(object sender, RoutedEventArgs e)
+    {
+        AccountHelper.Pipe(Login, "start");
     }
 
     public void ClickOpenSteam(object sender, RoutedEventArgs e)

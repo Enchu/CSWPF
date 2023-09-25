@@ -393,3 +393,7 @@ D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\MainWindow.baml
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\HomeView.g.cs
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\GeneratedInternalTypeHelper.g.cs
 D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\HomeView.baml
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\Interop.NetFwTypeLib.dll
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\CSWPF.csproj.ResolveComReference.cache
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\StRootToolView.g.cs
+D:\RABITA\Rider\CSWPF\CSWPF\obj\Debug\net7.0-windows\MVVM\View\StRootToolView.baml

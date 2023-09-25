@@ -188,7 +188,7 @@ public class Program
                 RedirectStandardError = true,
                 WorkingDirectory = steamPath,
                 FileName = path,
-                Arguments = string.Format("-applaunch 730 -language {0} {1} -w {2} -h {3} -x {4} -y {5} -novid -nosound", (object)accid, (object)str2, (object)result3, (object)result4, (object)result1, (object)result2)
+                Arguments = string.Format("-applaunch 730 -language {0} {1} -w 640 -h 480 -x {2} -y {3}", (object)accid, (object)str2, (object)result1, (object)result2)
             };
             Process process4 = new Process()
             {
@@ -288,7 +288,7 @@ public class Program
                                         Console.WriteLine("[CLIENT] REQUEST: START ACCOUNT");
                                         new Process()
                                         {
-                                            StartInfo = processStartInfo1
+                                            StartInfo = processStartInfo2
                                         }.Start();
                                         break;
                                     case "steam":

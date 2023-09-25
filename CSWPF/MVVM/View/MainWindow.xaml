@@ -10,7 +10,7 @@
         Height="600" Width="900"
         FontFamily="Tahoma"
         FontSize="16"
-        WindowStartupLocation="CenterScreen" Background="Transparent">
+        WindowStartupLocation="CenterScreen" Background="Transparent" Closed="ClosedAllWindow">
 
     <Window.DataContext>
         <viewModel:MainViewModel/>
@@ -55,6 +55,14 @@
                     FontSize="14" 
                     Style="{StaticResource MenuButtonTheme}"
                     Command="{Binding SettingCommand}"/>
+
+                <RadioButton 
+                    Content="Root Tool" 
+                    Height="50" 
+                    Foreground="White" 
+                    FontSize="14" 
+                    Style="{StaticResource MenuButtonTheme}"
+                    Command="{Binding RootToolCommand}"/>
             </StackPanel>
             
             <Grid Grid.Row="0" Grid.Column="1">
@@ -101,13 +109,14 @@
                     
                 </StackPanel>
                 
-                <Button Visibility="Collapsed" Width="200" Height="40" HorizontalAlignment="Right" Margin="0,0,10,0" Content="Добавить новый аккаунт"/>
             </Grid>
-            
-            <StackPanel Grid.Row="1" Grid.Column="1" Name="PanelCurrentView">
-                <ContentControl Margin="10" Content="{Binding CurrentView}"/>
-            </StackPanel>
-        
+
+            <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel  Name="PanelCurrentView">
+                    <ContentControl Margin="10" Content="{Binding CurrentView}"/>
+                </StackPanel>
+            </ScrollViewer>
+
         </Grid>
     </Border>
 </Window>

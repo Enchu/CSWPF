@@ -12,6 +12,17 @@ namespace CSWPF.Helpers;
 
 public class LobbyASD
 {
+    /*
+        pt1 - SCHT5-YDZJ
+        pt2 - S4E9W-SEZJ
+        pt3 - A2UYX-VFZJ
+        pt4 - SC7R7-XCWJ
+
+        pt6 - AL3VG-SBYQ
+        pt7 - S5XDY-XWXN
+        pt8 - SVTHX-UWYQ
+        pt9 - SWKK3-ZYZN
+     */
     public static async Task SetupLobby(User users)
     {
         await CopyLogAndPasToClipboard(users.Login, users.Password);
@@ -113,6 +124,15 @@ public class LobbyASD
       
         await ClickToAccount(842, 633, 300);
         await Task.Delay(1000);
+    }
+
+    private static async Task SetupCodeToIn()
+    {
+        await SetForeground();
+        
+        MoveToAccount( 619, 110);
+        await Task.Delay(200);
+        await ClickToAccount(660, 474, 500);
     }
     
     private static async Task SetupCodeToInvoice(User account, string code)

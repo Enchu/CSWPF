@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using CSWPF.Directory;
 using User = CSWPF.Directory.User;
+using System.Windows.Media;
+using System.Windows;
 
 namespace CSWPF.Helpers;
 
@@ -19,7 +21,7 @@ public class Settings
     public static readonly string ConfigBot = "-applaunch 730 -w 640 -h 480";
     public static readonly int Width = 360;
     public static readonly int Height = 270;
-    public static readonly string ConfigGame = "-novid +fps_max 1";//-console
+    public static readonly string ConfigGame = "-novid -nosound +fps_max 1 -nohltv -low -nopreload -nopreloadmodels +cl_forcepreload 0";//-console
     public static readonly string StartSteam = "-silent -vgui";
     public static readonly string ImgEconomy = "https://community.cloudflare.steamstatic.com/economy/image/";
     public static readonly string TokenID = "_TOKyI1G";
@@ -138,7 +140,7 @@ public class Settings
         int windowsPerRow = 5;
         int currentRow = 0;
         int currentColumn = 0;
-        int bottomMargin = 30;
+        int bottomMargin = 75;
         foreach (var user in users)
         {
             int x = currentColumn * Width;
@@ -169,5 +171,25 @@ public class Settings
         }
         
         return (0, 0);
+    }
+
+    public static IEnumerable<T> FindVisualChildren<T>(DependencyObject dependencyObject) where T : DependencyObject
+    {
+        if (dependencyObject != null)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dependencyObject); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(dependencyObject, i);
+                if (child != null && child is T t)
+                {
+                    yield return t;
+                }
+
+                foreach (T childOfChild in FindVisualChildren<T>(child))
+                {
+                    yield return childOfChild;
+                }
+            }
+        }
     }
 }

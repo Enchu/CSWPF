@@ -39,12 +39,12 @@ public partial class HomeView : UserControl
     {
         Button button = new Button();
         Image image = new Image();
-        image.Stretch = Stretch.Uniform;
         image.Source = new BitmapImage(new Uri($"pack://application:,,,/Icons/{iconsName}"));
         button.Content = image;
         button.Style = this.FindResource("ImageButtonStyle") as Style;
         button.Click += click;
         button.Tag = login;
+        button.Margin = new Thickness(0, 0, 0, 0);
 
         stackPanel.Children.Add(button);
     }
@@ -66,17 +66,17 @@ public partial class HomeView : UserControl
             stackPanel.Orientation = Orientation.Horizontal;
 
             //login
-            var login = new Button();
-            login.Content = db.Login;
-            login.Click += db.ClickLogin;
-            stackPanel.Children.Add(login);
-
+            createButton("login.png",db.ClickLogin, stackPanel, db.Login );
+            
             //password
             createButton("screwdriver.png", db.ClickPassword, stackPanel, db.Login);
 
             //start
             createButton("cow.png", db.ClickStart, stackPanel, db.Login);
 
+            //start cs
+            createButton("cs.png", db.CsClick , stackPanel, db.Login);
+            
             //open Steam
             //createButton("steam.png", db.ClickOpenSteam, PanelForOpenSteam, db.Login);
 

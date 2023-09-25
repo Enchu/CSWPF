@@ -6,8 +6,14 @@
              xmlns:local="clr-namespace:CSWPF.MVVM.View"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" >
-    <StackPanel>
-        <TextBlock Text="Home" Foreground="White" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-        <StackPanel Name="PanelForStart" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Grid.Row="0" Text="Home" Foreground="White" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,20"/>
+        <StackPanel Grid.Row="1" Name="PanelForStart" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        
+    </Grid>
 </UserControl>

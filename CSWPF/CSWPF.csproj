@@ -51,6 +51,19 @@
       <Resource Include="Icons\start.png" />
       <None Remove="Icons\murder.png" />
       <Resource Include="Icons\murder.png" />
+      <None Remove="Icons\cs.png" />
+      <Resource Include="Icons\cs.png" />
+      <None Remove="Icons\login.png" />
+      <COMReference Include="NetFwTypeLib">
+        <VersionMinor>0</VersionMinor>
+        <VersionMajor>1</VersionMajor>
+        <Guid>58fbcf7c-e7a9-467c-80b3-fc65e8fcca08</Guid>
+        <Lcid>0</Lcid>
+        <WrapperTool>tlbimp</WrapperTool>
+        <Isolated>false</Isolated>
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </COMReference>
+      <Resource Include="Icons\login.png" />
     </ItemGroup>
 
     <ItemGroup>
