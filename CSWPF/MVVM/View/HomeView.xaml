@@ -13,7 +13,8 @@
         </Grid.RowDefinitions>
         
         <TextBlock Grid.Row="0" Text="Home" Foreground="White" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,20"/>
-        <StackPanel Grid.Row="1" Name="PanelForStart" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        
+        <StackPanel Grid.Row="1" Name="PanelForStart" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5"/>
         
     </Grid>
 </UserControl>

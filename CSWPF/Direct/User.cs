@@ -1,31 +1,81 @@
-﻿using CSWPF.Directory.Models;
-using CSWPF.Helpers;
+﻿using CSWPF.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows;
+using CSWPF.Core;
 
 namespace CSWPF.Directory;
 
 [DataContract]
 [Serializable]
-public class User
+public class User: ObservableObject
 {
+    private string login;
     [DataMember(Name = "Login")]
-    public string Login { get; set; }
+    public string Login
+    {
+        get { return login; }
+        set { login = value; OnPropertyChanged(); }
+    }
+    
+    private string password;
     [DataMember(Name = "Password")]
-    public string Password { get; set; }
+    public string Password
+    {
+        get { return password; }
+        set { password = value; OnPropertyChanged(); }
+    }
+    
+    private ulong steamID;
     [JsonProperty("SteamID")]
-    public ulong SteamID { get; set; }
+    public ulong SteamID
+    {
+        get { return steamID; }
+        set { steamID = value; OnPropertyChanged(); }
+    }
+    
+    private ulong sid;
     [DataMember(Name = "Sid")]
-    public ulong SID { get; set; }
-    [JsonProperty("shared_secret")]
-    public string SharedSecret { get; set; }
-    [JsonProperty("prime")]
-    public bool Prime { get; set; }
-    public DateTime DateTime { get; set; } = DateTime.Now;
+    public ulong SID
+    {
+        get { return sid; }
+        set { sid = value; OnPropertyChanged(); }
+    }
+    
+    private string sharedSecret;
+    [JsonProperty("Shared_secret")]
+    public string SharedSecret
+    {
+        get { return sharedSecret; }
+        set { sharedSecret = value; OnPropertyChanged(); }
+    }
+    
+    private bool prime;
+    [JsonProperty("Prime")]
+    public bool Prime
+    {
+        get { return prime; }
+        set { prime = value; OnPropertyChanged(); }
+    }
+    
+    private DateTime dateTime = DateTime.Now;
+    [JsonProperty("Date_Time")]
+    public DateTime DateTime
+    {
+        get { return dateTime; }
+        set { dateTime = value; OnPropertyChanged(); }
+    }
+    
+    private string inviteCode;
+    [JsonProperty("Invate_Code")]
+    public string InviteCode
+    {
+        get { return inviteCode; }
+        set { inviteCode = value; OnPropertyChanged(); }
+    }
 
     public User(string login, string password)
     {
